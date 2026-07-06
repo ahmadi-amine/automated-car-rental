@@ -1,0 +1,99 @@
+# Setup Authentication and Database Schema
+
+Sets up the foundational auth layer and DB schema for the B2B car rental platform. Covers Prisma models, JWT auth with bcrypt, a roles guard, and shared PrismaService.
+
+## Proposed Changes
+
+### Dependencies
+
+#### [MODIFY] [package.json](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/package.json)
+Install the following packages via `npm install` (runtime):
+- `@prisma/client`, `@nestjs/jwt`, `@nestjs/passport`, `@nestjs/config`, `passport`, `passport-jwt`, `bcrypt`
+
+Install as devDependencies:
+- `prisma`, `@types/bcrypt`, `@types/passport-jwt`
+
+---
+
+### Prisma Schema & Environment
+
+#### [NEW] [schema.prisma](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/prisma/schema.prisma)
+- Defines `Role` enum: `ADMIN`, `AGENCY`
+- `User` model: `id`, `email` (unique), `password`, `role` (Role), timestamps
+- [Agency](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/agency/agency.module.ts#5-10) model: one-to-one `userId` FK to `User`, `name`, `minAge`, `depositAmount`, `rentalConditions`, timestamps
+
+#### [NEW] [.env](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/.env)
+```
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/car_rental_db"
+JWT_SECRET="your-super-secret-key"
+```
+> [!IMPORTANT]
+> You must replace `USER` and `PASSWORD` with your actual PostgreSQL credentials before running migrations.
+
+---
+
+### Shared Prisma Module
+
+#### [NEW] [prisma.service.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/prisma/prisma.service.ts)
+Extends `PrismaClient`, connects on `onModuleInit`, disconnects on `onModuleDestroy`.
+
+#### [NEW] [prisma.module.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/prisma/prisma.module.ts)
+Global module exporting `PrismaService` for use across the app.
+
+---
+
+### Auth Module
+
+#### [NEW] [login.dto.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/auth/dto/login.dto.ts)
+Defines `LoginDto` with `email` and `password` fields.
+
+#### [NEW] [jwt.strategy.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/auth/strategies/jwt.strategy.ts)
+Passport `JwtStrategy` extracting Bearer token, validating against `JWT_SECRET`, returning `{ userId, email, role }` payload.
+
+#### [MODIFY] [auth.service.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/auth/auth.service.ts)
+- `login(dto)`: finds user by email, compares bcrypt hash, generates and returns a signed JWT.
+
+#### [MODIFY] [auth.controller.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/auth/auth.controller.ts)
+- `POST /auth/login`: takes `LoginDto`, returns `{ access_token }`.
+
+#### [MODIFY] [auth.module.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/auth/auth.module.ts)
+Imports `JwtModule.registerAsync` (reads `JWT_SECRET` from config), `PassportModule`, `PrismaModule`. Provides `JwtStrategy`.
+
+---
+
+### Common Guards & Decorators
+
+#### [NEW] [roles.decorator.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/common/decorators/roles.decorator.ts)
+`@Roles(...roles)` metadata decorator using `SetMetadata`.
+
+#### [NEW] [roles.guard.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/common/guards/roles.guard.ts)
+`RolesGuard` implementing `CanActivate`. Uses `Reflector` to read `@Roles` metadata, compares to `request.user.role`.
+
+#### [NEW] [jwt-auth.guard.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/common/guards/jwt-auth.guard.ts)
+Thin wrapper around `AuthGuard('jwt')` for clean import in controllers.
+
+---
+
+### App Module
+
+#### [MODIFY] [app.module.ts](file:///c:/Users/amine/Desktop/Liadtech/personel%20project/Ai%20Car%20Rental/backend/src/app.module.ts)
+Imports `ConfigModule.forRoot({ isGlobal: true })` and `PrismaModule`.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+The existing spec files are scaffolded but empty. No existing tests cover auth. After implementation:
+
+```bash
+cd "c:\Users\amine\Desktop\Liadtech\personel project\Ai Car Rental\backend"
+npm run test
+```
+This will run Jest on all `*.spec.ts` files to verify no compilation errors.
+
+### Manual Verification (after configuring .env & running `prisma migrate dev`)
+1. Start the server: `npm run start:dev`
+2. Send a `POST` to `http://localhost:3000/auth/login` with body `{"email":"test@example.com","password":"password"}` using Postman or curl.
+3. Expect a `401 Unauthorized` (user doesn't exist yet) or a `{ "access_token": "..." }` JWT on success.
+4. Decode the JWT at [jwt.io](https://jwt.io) to verify it contains `userId`, `email`, and `role`.

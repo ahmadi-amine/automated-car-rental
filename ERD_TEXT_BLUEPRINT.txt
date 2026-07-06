@@ -1,0 +1,154 @@
+
+# LuxDrive ERD Text Blueprint for Diagram Generation
+---
+---
+
+## 1. Data Entities & Internal Attributes
+
+### Enumeration Types
+Enumeration 1: Role
+  - ADMIN
+  - AGENCY
+
+Enumeration 2: Category
+  - ECONOMY
+  - SEDAN
+  - SUV
+  - LUXURY
+  - SPORTS
+  - VAN
+
+Enumeration 3: BookingStatus
+  - DRAFT
+  - PENDING
+  - CONFIRMED
+  - CANCELLED
+
+---
+
+### Data Entity 1: User
+String id PK, @default(uuid())
+String email @unique
+String password
+Role role @default(AGENCY)
+Boolean isApproved @default(false)
+DateTime createdAt @default(now())
+DateTime updatedAt @updatedAt
+
+---
+
+### Data Entity 2: Agency
+String id PK, @default(uuid())
+String name
+String slug @unique, @nullable
+String description @nullable
+String bio @nullable
+String logoUrl @nullable
+String bannerUrl @nullable
+String primaryColor @nullable, @default("#3b82f6")
+Int minAge @default(21)
+Float depositAmount @default(0)
+String rentalConditions
+String phone @nullable
+String address @nullable
+String publicEmail @nullable
+DateTime createdAt @default(now())
+DateTime updatedAt @updatedAt
+String userId FK, @unique
+
+---
+
+### Data Entity 3: Vehicle
+String id PK, @default(uuid())
+String make
+String model
+Int year
+String registrationNumber @unique
+Float pricePerDay
+Category category @default(SEDAN)
+String[] features @default([])
+String imageUrl @nullable
+DateTime createdAt @default(now())
+DateTime updatedAt @updatedAt
+String agencyId FK
+
+---
+
+### Data Entity 4: Customer
+String id PK, @default(uuid())
+String firstName
+String lastName
+String email
+String phone
+String licenseNumber @nullable
+DateTime createdAt @default(now())
+DateTime updatedAt @updatedAt
+
+---
+
+### Data Entity 5: Booking
+String id PK, @default(uuid())
+DateTime startDate
+DateTime endDate
+Float totalPrice
+BookingStatus status @default(PENDING)
+DateTime createdAt @default(now())
+DateTime updatedAt @updatedAt
+String customerId FK
+String vehicleId FK
+String agencyId FK
+
+---
+---
+
+## 2. System Actor & Special AI Entities
+
+### Special Entity: B2B Pricing Agent
+Row 1: Type: "Stateless AI-Worker"
+Row 2: Knowledge: "Operational Market Weights"
+
+---
+---
+
+## 3. Relational Mapping & Cardinality Rules
+
+1. User to Agency (Strict 1:1)
+   - Parent Table: User
+   - Child Table: Agency
+   - Connecting Foreign Key: Agency.userId → User.id
+   - Operational Behavior: onDelete: Cascade
+
+2. Agency to Vehicle (One-to-Many, 1:N)
+   - Parent Table: Agency
+   - Child Table: Vehicle
+   - Connecting Foreign Key: Vehicle.agencyId → Agency.id
+   - Operational Behavior: onDelete: Cascade
+
+3. Agency to Booking (One-to-Many, 1:N)
+   - Parent Table: Agency
+   - Child Table: Booking
+   - Connecting Foreign Key: Booking.agencyId → Agency.id
+   - Operational Behavior: Standard (No Cascade)
+
+4. Vehicle to Booking (One-to-Many, 1:N)
+   - Parent Table: Vehicle
+   - Child Table: Booking
+   - Connecting Foreign Key: Booking.vehicleId → Vehicle.id
+   - Operational Behavior: Standard (No Cascade)
+
+5. Customer to Booking (One-to-Many, 1:N)
+   - Parent Table: Customer
+   - Child Table: Booking
+   - Connecting Foreign Key: Booking.customerId → Customer.id
+   - Operational Behavior: Standard (No Cascade)
+
+---
+---
+
+## 4. Multi-Agent Connection Rule
+
+Diagramming AI Directive: Draw a clear, distinctive dashed/dotted line originating from the B2B Pricing Agent entity box pointing directly to the Vehicle entity box, with the label: "estimates pricePerDay".
+
+---
+---
+End of Blueprint

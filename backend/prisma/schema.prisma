@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  relationMode = "foreignKeys"
+}
+
+model MarketPricingData {
+  id             String   @id @default(uuid())
+  make           String
+  model          String
+  year           Int
+  category       Category
+  location       String
+  actualPriceMad Float
+  embedding      Unsupported("vector")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  AGENCY
+}
+
+
+
+enum Category {
+  ECONOMY
+  SEDAN
+  SUV
+  LUXURY
+  SPORTS
+  VAN
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  role       Role     @default(AGENCY)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  agency Agency?
+}
+
+model Agency {
+  id                String   @id @default(uuid())
+  name              String
+  slug              String?  @unique
+  description       String?
+  bio               String?
+  logoUrl           String?
+  bannerUrl         String?
+  primaryColor      String?  @default("#3b82f6")
+  minAge            Int      @default(21)
+  depositAmount     Float    @default(0)
+  rentalConditions  String
+  phone             String?
+  address           String?
+  publicEmail       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  userId   String    @unique
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicles Vehicle[]
+  bookings Booking[]
+}
+
+model Vehicle {
+  id                 String        @id @default(uuid())
+  make               String
+  model              String
+  year               Int
+  registrationNumber String        @unique
+  pricePerDay        Float
+  category           Category      @default(SEDAN)
+  features           String[]      @default([])
+  imageUrl           String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  agencyId String
+  agency   Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+}
+
+model Customer {
+  id            String    @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  licenseNumber String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  startDate  DateTime
+  endDate    DateTime
+  totalPrice Float
+  status     BookingStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id])
+}
+
