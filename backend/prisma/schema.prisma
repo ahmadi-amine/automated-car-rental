@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider     = "postgresql"
   relationMode = "foreignKeys"
+  url          = env("DATABASE_URL")
 }
 
 model MarketPricingData {
