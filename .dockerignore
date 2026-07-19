@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+dist
+.next
+out
+.env
+.env.local
+.env.*.local
+uploads
+.git
+.gitignore
+coverage
+.nyc_output

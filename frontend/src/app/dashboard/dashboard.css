@@ -1,0 +1,624 @@
+.dashboardContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+.sidebar {
+    width: 280px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+}
+
+.logoSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    padding: 0 10px;
+}
+
+.logoText {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.navItem:hover {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+}
+
+.navItem.active {
+    background: var(--accent);
+    color: white;
+}
+
+.logoutBtn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #f87171;
+    transition: var(--transition);
+    margin-top: auto;
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.mainContent {
+    flex-grow: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.userAvatar {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+}
+
+.statCard {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.statCard h3 {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.statValue {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.statHeader {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+}
+
+.statMeta {
+    font-size:12px;
+    color:var(--text-secondary);
+}
+
+.statBody {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+}
+
+.statSmall {
+    font-size:12px;
+    color:var(--text-secondary);
+    margin-top:6px;
+}
+
+.statChart {
+    width:120px;
+    height:36px;
+}
+
+.recentActivity {
+    padding: 24px;
+    flex-grow: 1;
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.recentActivity h2 {
+    font-size: 20px;
+    margin-bottom: 24px;
+}
+
+.emptyState {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Table Styles */
+.tableContainer {
+    overflow-x: auto;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.dataTable th,
+.dataTable td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.dataTable th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.agencyNameCol {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.statusBadge.approved,
+.statusBadge.available {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.statusBadge.pending,
+.statusBadge.maintenance {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.statusBadge.rented,
+.statusBadge.unavailable {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    width: 100%;
+    max-width: 720px;
+    padding: 28px;
+    border-radius: 10px;
+    /* Make modal panels more solid to prevent background bleeding-through */
+    background-color: rgba(11, 14, 17, 0.98); /* near-opaque surface */
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    backdrop-filter: none; /* disable extra glass blur for modal content */
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.closeBtn {
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.closeBtn:hover {
+    color: var(--text-primary);
+}
+
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.iconBtn {
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.iconBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.iconBtn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+
+.approveBtn {
+    background: var(--accent);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.approveBtn:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-1px);
+}
+
+/* Fleet Grid & Car Cards */
+.fleetGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.carCard {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.carCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.carImageContainer {
+    position: relative;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carPlaceholder {
+    color: rgba(255, 255, 255, 0.1);
+}
+
+.statusTag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+}
+
+.statusTag.available {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.statusTag.rented, .statusTag.cancelled {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+}
+
+.statusTag.pending, .statusTag.maintenance {
+    background: rgba(245, 158, 11, 0.9);
+    color: white;
+}
+
+.statusTag.confirmed, .statusTag.approved {
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+}
+
+.statusTag.draft {
+    background: rgba(148, 163, 184, 0.9);
+    color: white;
+}
+
+.carDetails {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.carHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.carHeader h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.carYear {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.carMenuBtn {
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.carMenuBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.carStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+}
+
+.carStat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.statLabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.statPrice {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.statInfo {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.carActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.editBtn,
+.deleteBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.editBtn {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.editBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.deleteBtn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.deleteBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.imageUploadBox {
+    transition: var(--transition);
+}
+
+.imageUploadBox:hover {
+    border-color: var(--accent) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Searchable Select Styles */
+.searchableSelect {
+    position: relative;
+    width: 100%;
+}
+
+.searchSelectBtn {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.searchDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    background: #16181d !important;
+    /* Solid surface color */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+}
+
+.searchInputWrapper {
+    position: sticky;
+    top: 0;
+    background: transparent;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.searchIconInside {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    opacity: 0.5;
+}
+
+.searchOption {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: var(--transition);
+    color: var(--text-secondary);
+}
+
+.searchOption:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.searchOption.selected {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent);
+}
+
+.noResults {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}

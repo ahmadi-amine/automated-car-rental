@@ -1,0 +1,182 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--background);
+}
+
+.registerCard {
+    width: 100%;
+    max-width: 560px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+/* removed entrance animation for consistent enterprise feel */
+
+.header {
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.logoIcon {
+    color: var(--accent);
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.input {
+    width: 100%;
+    padding: 12px 14px 12px 44px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.submitBtn {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--accent);
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.submitBtn:active {
+    transform: translateY(0);
+}
+
+.submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.footerText {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.footerText a {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.footerText a:hover {
+    text-decoration: underline;
+}
+
+/* Success State */
+.successState {
+    text-align: center;
+    align-items: center;
+    padding: 60px 40px;
+}
+
+.successIcon {
+    color: var(--success);
+    margin-bottom: 24px;
+}
+
+.successState h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.successState p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.redirectNote {
+    margin-top: 24px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.loginBtn {
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: var(--accent);
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+}
