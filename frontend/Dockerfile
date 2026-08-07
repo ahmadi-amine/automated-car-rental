@@ -13,6 +13,12 @@ RUN npm ci
 # Copy the rest of the code
 COPY . .
 
+# The public API URL is inlined by Next.js at BUILD time (NEXT_PUBLIC_*),
+# so it must be provided as a build argument, not just a runtime env var.
+# Point this at the deployed backend origin (e.g. https://api.example.com).
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Build for production
 RUN npm run build
 
