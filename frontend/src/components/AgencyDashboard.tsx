@@ -133,7 +133,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         slug: '',
         description: '',
         bio: '',
-        primaryColor: '#3b82f6',
+        primaryColor: '#7e2637',
         minAge: 21,
         depositAmount: 0,
         rentalConditions: '',
@@ -151,7 +151,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
     const fetchVehicles = async () => {
         try {
-            const res = await fetch('${getApiUrl()}/api/vehicles', {
+            const res = await fetch(`${getApiUrl()}/api/vehicles`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -165,7 +165,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
     const fetchProfile = async () => {
         try {
-            const res = await fetch('${getApiUrl()}/api/agency/me', {
+            const res = await fetch(`${getApiUrl()}/api/agency/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -176,7 +176,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                     slug: data.slug || '',
                     description: data.description || '',
                     bio: data.bio || '',
-                    primaryColor: data.primaryColor || '#3b82f6',
+                    primaryColor: data.primaryColor || '#7e2637',
                     minAge: data.minAge || 21,
                     depositAmount: data.depositAmount || 0,
                     rentalConditions: data.rentalConditions || '',
@@ -193,7 +193,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const fetchBookings = async () => {
         setIsLoadingBookings(true);
         try {
-            const res = await fetch('${getApiUrl()}/api/bookings/agency', {
+            const res = await fetch(`${getApiUrl()}/api/bookings/agency`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -234,7 +234,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         e.preventDefault();
         setIsSavingProfile(true);
         try {
-            const res = await fetch('${getApiUrl()}/api/agency/me', {
+            const res = await fetch(`${getApiUrl()}/api/agency/me`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -266,7 +266,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         formData.append('banner', file);
 
         try {
-            const res = await fetch('${getApiUrl()}/api/agency/banner', {
+            const res = await fetch(`${getApiUrl()}/api/agency/banner`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData,
@@ -295,7 +295,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         formData.append('logo', file);
 
         try {
-            const res = await fetch('${getApiUrl()}/api/agency/logo', {
+            const res = await fetch(`${getApiUrl()}/api/agency/logo`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData,
@@ -413,7 +413,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         try {
             const url = isEditing
                 ? `${getApiUrl()}/api/vehicles/${editingId}`
-                : '${getApiUrl()}/api/vehicles';
+                : `${getApiUrl()}/api/vehicles`;
 
             const method = isEditing ? 'PATCH' : 'POST';
 
@@ -521,7 +521,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             <section className="statsGrid">
                 <div className="statCard glass">
                     <h3>Total Revenue</h3>
-                    <p className="statValue" style={{ color: '#10b981' }}>{totalRevenue.toLocaleString()} MAD</p>
+                    <p className="statValue" style={{ color: '#6fa07a' }}>{totalRevenue.toLocaleString()} MAD</p>
                 </div>
                 <div className="statCard glass">
                     <h3>Pending Requests</h3>
@@ -547,20 +547,20 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                     <div className="tableContainer">
                         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                             <thead>
-                                <tr style={{ color: '#94a3b8', fontSize: '13px', textTransform: 'uppercase' }}>
-                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Ref</th>
-                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Customer</th>
-                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Vehicle</th>
-                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Status</th>
+                                <tr style={{ color: '#a99a83', fontSize: '13px', textTransform: 'uppercase' }}>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>Ref</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>Customer</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>Vehicle</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {bookings.slice(0, 5).map(b => (
                                     <tr key={b.id}>
-                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'monospace', fontSize: '12px' }}>#{b.id.split('-')[0]}</td>
-                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{b.customer.firstName} {b.customer.lastName}</td>
-                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{b.vehicle.make} {b.vehicle.model}</td>
-                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)', fontFamily: 'monospace', fontSize: '12px' }}>#{b.id.split('-')[0]}</td>
+                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>{b.customer.firstName} {b.customer.lastName}</td>
+                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>{b.vehicle.make} {b.vehicle.model}</td>
+                                        <td style={{ padding: '12px 16px', borderBottom: '1px solid rgba(240,232,214,0.05)' }}>
                                             <span className={`statusTag ${b.status.toLowerCase()}`} style={{ position: 'static', display: 'inline-block' }}>
                                                 {b.status}
                                             </span>
@@ -648,10 +648,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             style={{ 
                                 width: '100%', 
                                 height: '180px', 
-                                background: '#0a0b10', 
+                                background: '#14110d', 
                                 borderRadius: '16px', 
                                 overflow: 'hidden',
-                                border: '2px dashed rgba(255,255,255,0.1)',
+                                border: '2px dashed rgba(240,232,214,0.1)',
                                 position: 'relative',
                                 cursor: 'pointer'
                             }}
@@ -680,10 +680,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             style={{ 
                                 width: '180px', 
                                 height: '180px', 
-                                background: '#0a0b10', 
+                                background: '#14110d', 
                                 borderRadius: '16px', 
                                 overflow: 'hidden',
-                                border: '2px dashed rgba(255,255,255,0.1)',
+                                border: '2px dashed rgba(240,232,214,0.1)',
                                 position: 'relative',
                                 cursor: 'pointer',
                                 margin: '0 auto'
@@ -916,14 +916,14 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <button 
                         onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
-                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        style={{ background: 'rgba(240,232,214,0.05)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
                         <ChevronLeft size={20} /> Previous
                     </button>
                     <h2 style={{ color: 'white', margin: 0 }}>{monthNames[month]} {year}</h2>
                     <button 
                         onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
-                        style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        style={{ background: 'rgba(240,232,214,0.05)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
                         Next <ChevronRight size={20} />
                     </button>
@@ -932,7 +932,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 {/* Days of Week */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '12px' }}>
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                        <div key={d} style={{ textAlign: 'center', color: '#94a3b8', fontWeight: '600', fontSize: '13px', textTransform: 'uppercase' }}>
+                        <div key={d} style={{ textAlign: 'center', color: '#a99a83', fontWeight: '600', fontSize: '13px', textTransform: 'uppercase' }}>
                             {d}
                         </div>
                     ))}
@@ -946,7 +946,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             <div 
                                 key={idx} 
                                 style={{ 
-                                    background: d.isCurrentMonth ? 'rgba(255,255,255,0.03)' : 'transparent', 
+                                    background: d.isCurrentMonth ? 'rgba(240,232,214,0.03)' : 'transparent', 
                                     borderRadius: '12px', 
                                     padding: '8px', 
                                     display: 'flex', 
@@ -955,13 +955,13 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                     cursor: 'pointer',
                                     transition: '0.2s'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = d.isCurrentMonth ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = d.isCurrentMonth ? 'rgba(255,255,255,0.03)' : 'transparent'}
+                                onMouseEnter={(e) => e.currentTarget.style.background = d.isCurrentMonth ? 'rgba(240,232,214,0.08)' : 'rgba(240,232,214,0.03)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = d.isCurrentMonth ? 'rgba(240,232,214,0.03)' : 'transparent'}
                             >
                                 <div style={{ 
                                     fontSize: '13px', 
                                     fontWeight: '600', 
-                                    color: d.isCurrentMonth ? 'white' : '#475569',
+                                    color: d.isCurrentMonth ? 'white' : '#6b6152',
                                     marginBottom: '4px' 
                                 }}>
                                     {d.day}
@@ -985,10 +985,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis',
                                                 background: b.status === 'CONFIRMED' 
-                                                    ? 'rgba(59, 130, 246, 0.8)' 
+                                                    ? 'rgba(126,38,55,0.9)' 
                                                     : b.status === 'PENDING' 
-                                                        ? 'rgba(245, 158, 11, 0.8)'
-                                                        : 'rgba(148,163,184, 0.5)',
+                                                        ? 'rgba(181,80,46,0.85)'
+                                                        : 'rgba(131,119,99,0.55)',
                                                 cursor: 'pointer'
                                             }}
                                         >
@@ -996,7 +996,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         </div>
                                     ))}
                                     {dayBookings.length > 3 && (
-                                        <div style={{ fontSize: '10px', color: '#94a3b8', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '10px', color: '#a99a83', textAlign: 'center' }}>
                                             +{dayBookings.length - 3} more
                                         </div>
                                     )}
@@ -1020,45 +1020,45 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             <div className="statusTag" style={{ 
                                 width: 'fit-content', 
                                 background: selectedBooking.status === 'CONFIRMED' 
-                                    ? 'rgba(59,130,246,0.2)' 
+                                    ? 'rgba(126,38,55,0.3)' 
                                     : selectedBooking.status === 'PENDING' 
-                                        ? 'rgba(245,158,11,0.2)' 
-                                        : 'rgba(148,163,184,0.2)',
+                                        ? 'rgba(181,80,46,0.3)' 
+                                        : 'rgba(131,119,99,0.25)',
                                 color: selectedBooking.status === 'CONFIRMED' 
-                                    ? '#60a5fa' 
+                                    ? '#a8465a' 
                                     : selectedBooking.status === 'PENDING' 
-                                        ? '#fbbf24' 
-                                        : '#94a3b8'
+                                        ? '#c06a44' 
+                                        : '#a99a83'
                             }}>
                                 {selectedBooking.status}
                             </div>
 
-                            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px' }}>
+                            <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
                                 <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '16px' }}>Vehicle</h3>
-                                <p style={{ margin: '0', color: '#94a3b8', fontSize: '14px' }}>
+                                <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
                                     {selectedBooking.vehicle.make} {selectedBooking.vehicle.model} ({selectedBooking.vehicle.year})
                                 </p>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '12px' }}>
+                                <p style={{ margin: '4px 0 0 0', color: '#837763', fontSize: '12px' }}>
                                     Reg: {selectedBooking.vehicle.registrationNumber}
                                 </p>
                             </div>
 
-                            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px' }}>
+                            <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
                                 <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '16px' }}>Customer</h3>
-                                <p style={{ margin: '0', color: '#94a3b8', fontSize: '14px' }}>
+                                <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
                                     {selectedBooking.customer.firstName} {selectedBooking.customer.lastName}
                                 </p>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '12px' }}>
+                                <p style={{ margin: '4px 0 0 0', color: '#837763', fontSize: '12px' }}>
                                     {selectedBooking.customer.email}
                                 </p>
-                                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '12px' }}>
+                                <p style={{ margin: '4px 0 0 0', color: '#837763', fontSize: '12px' }}>
                                     {selectedBooking.customer.phone}
                                 </p>
                             </div>
 
-                            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px' }}>
+                            <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
                                 <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '16px' }}>Rental Period</h3>
-                                <p style={{ margin: '0', color: '#94a3b8', fontSize: '14px' }}>
+                                <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
                                     {new Date(selectedBooking.startDate).toLocaleDateString('en-US', { 
                                         year: 'numeric', 
                                         month: 'long', 
@@ -1071,8 +1071,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 </p>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                                <span style={{ color: '#94a3b8', fontSize: '14px' }}>Total Price</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(240,232,214,0.03)', borderRadius: '16px' }}>
+                                <span style={{ color: '#a99a83', fontSize: '14px' }}>Total Price</span>
                                 <span style={{ color: 'white', fontSize: '20px', fontWeight: '800' }}>{selectedBooking.totalPrice} MAD</span>
                             </div>
 
@@ -1097,7 +1097,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                 setSelectedBooking(null);
                                             }
                                         }}
-                                        style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
+                                        style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(198,90,72,0.16)', border: '1px solid #c65a48', color: '#c65a48', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
                                     >
                                         Cancel Booking
                                     </button>
@@ -1148,7 +1148,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             justifyContent: 'center',
                                             cursor: 'pointer',
                                             overflow: 'hidden',
-                                            border: '2px dashed rgba(255,255,255,0.1)',
+                                            border: '2px dashed rgba(240,232,214,0.1)',
                                             position: 'relative'
                                         }}
                                     >
@@ -1242,12 +1242,12 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                     onClick={handleGetAiPrice}
                                                     disabled={isGettingAiPrice || !formData.make}
                                                     style={{ 
-                                                        background: 'rgba(255,255,255,0.05)',
-                                                        border: '1px solid rgba(255,255,255,0.1)', 
+                                                        background: 'rgba(240,232,214,0.05)',
+                                                        border: '1px solid rgba(240,232,214,0.1)', 
                                                         padding: '4px 10px', 
                                                         fontSize: '11px', 
                                                         borderRadius: '8px', 
-                                                        color: agencyProfile?.primaryColor || '#3b82f6',
+                                                        color: agencyProfile?.primaryColor || '#7e2637',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         gap: '4px',
@@ -1277,13 +1277,13 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         <div className="glass" style={{ 
                                             padding: '16px', 
                                             borderRadius: '12px', 
-                                            background: 'rgba(59, 130, 246, 0.05)',
-                                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                                            background: 'rgba(126,38,55,0.12)',
+                                            border: '1px solid rgba(126,38,55,0.3)',
                                             marginTop: '8px'
                                         }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <Zap size={16} style={{ color: '#3b82f6' }} />
+                                                    <Zap size={16} style={{ color: '#7e2637' }} />
                                                     <span style={{ fontWeight: '700', fontSize: '14px' }}>AI Recommended: {aiPriceSuggestion.suggestedPrice} MAD</span>
                                                 </div>
                                                 <button 
@@ -1293,9 +1293,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                         setAiPriceSuggestion(null);
                                                     }}
                                                     style={{ 
-                                                        background: '#3b82f6', 
-                                                        color: 'white', 
-                                                        border: 'none', 
+                                                        background: '#7e2637',
+                                                        color: '#f6ebe9',
+                                                        border: 'none',
                                                         padding: '4px 12px', 
                                                         borderRadius: '6px', 
                                                         fontSize: '12px', 

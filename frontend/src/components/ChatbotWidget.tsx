@@ -18,6 +18,55 @@ interface ChatbotWidgetProps {
   agencyName: string;
 }
 
+// Render minimal inline formatting: **bold** segments become <strong>.
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+  return parts.map((p, i) => {
+    const bold = p.match(/^\*\*([^*]+)\*\*$/);
+    return bold
+      ? <strong key={i} style={{ fontWeight: 700 }}>{bold[1]}</strong>
+      : <span key={i}>{p}</span>;
+  });
+}
+
+// Turn a plain-text AI reply into structured JSX: short paragraphs, bullet lists,
+// and numbered lists — so responses read cleanly inside the narrow chat widget.
+function renderRichText(text: string): React.ReactNode {
+  const lines = (text || '').split('\n');
+  const blocks: React.ReactNode[] = [];
+  let bullets: string[] = [];
+
+  const flushBullets = () => {
+    if (!bullets.length) return;
+    const items = [...bullets];
+    blocks.push(
+      <ul key={`ul-${blocks.length}`} style={{ margin: 0, paddingLeft: 2, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {items.map((b, i) => (
+          <li key={i} style={{ display: 'flex', gap: 8, lineHeight: 1.45 }}>
+            <span style={{ opacity: 0.55, flexShrink: 0 }}>•</span>
+            <span>{renderInline(b)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+    bullets = [];
+  };
+
+  lines.forEach((raw) => {
+    const line = raw.trim();
+    if (!line) { flushBullets(); return; }
+    const bullet = line.match(/^(?:[-•*]|\d+[.)])\s+(.*)$/);
+    if (bullet) { bullets.push(bullet[1]); return; }
+    flushBullets();
+    blocks.push(
+      <p key={`p-${blocks.length}`} style={{ margin: 0, lineHeight: 1.5 }}>{renderInline(line)}</p>
+    );
+  });
+  flushBullets();
+
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{blocks}</div>;
+}
+
 export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: ChatbotWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -327,34 +376,34 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
       right: '30px',
       width: '380px',
       height: isMinimized ? '60px' : '550px',
-      background: '#16181d',
+      background: '#241f18',
       borderRadius: '24px',
       display: 'flex',
       flexDirection: 'column',
       boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
       zIndex: 9999,
       overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.1)',
+      border: '1px solid rgba(240,232,214,0.1)',
       transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     }}>
       {/* Header */}
       <div style={{
         padding: '16px 20px',
-        background: `linear-gradient(135deg, ${primaryColor} 0%, #16181d 100%)`,
+        background: `linear-gradient(135deg, ${primaryColor} 0%, #241f18 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid rgba(240,232,214,0.1)',
         cursor: 'pointer'
       }} onClick={() => isMinimized && setIsMinimized(false)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '40px', height: '40px', background: 'rgba(240,232,214,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Bot size={24} color="white" />
           </div>
           <div>
             <div style={{ fontWeight: '700', fontSize: '15px', color: 'white' }}>{agencyName} AI</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></span>
+            <div style={{ fontSize: '12px', color: 'rgba(240,232,214,0.6)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '8px', height: '8px', background: '#6fa07a', borderRadius: '50%' }}></span>
               Online
             </div>
           </div>
@@ -390,7 +439,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
-            background: 'rgba(255,255,255,0.02)'
+            background: 'rgba(240,232,214,0.02)'
           }}>
             {messages.map((msg, i) => (
               <div key={i} style={{
@@ -406,7 +455,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                   width: '100%'
                 }}>
                   {msg.role === 'assistant' && (
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: '32px', height: '32px', background: 'rgba(240,232,214,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <Bot size={18} color={primaryColor} />
                     </div>
                   )}
@@ -414,13 +463,14 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                     maxWidth: '80%',
                     padding: '12px 16px',
                     borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                    background: msg.role === 'user' ? primaryColor : 'rgba(255,255,255,0.05)',
+                    background: msg.role === 'user' ? primaryColor : 'rgba(240,232,214,0.05)',
                     color: 'white',
                     fontSize: '14px',
                     lineHeight: '1.5',
+                    wordBreak: 'break-word',
                     boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
                   }}>
-                    {msg.content}
+                    {renderRichText(msg.content)}
                     {msg.role === 'assistant' && (
                       <button 
                         onClick={() => playTextAsSpeech(msg.content)}
@@ -432,7 +482,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                     )}
                   </div>
                   {msg.role === 'user' && (
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: '32px', height: '32px', background: 'rgba(240,232,214,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <User size={18} color="white" />
                     </div>
                   )}
@@ -446,15 +496,15 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                     width: 'calc(100% - 42px)',
                     padding: '16px',
                     borderRadius: '16px',
-                    border: msg.isConfirmed ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
-                    background: msg.isConfirmed ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.03)'
+                    border: msg.isConfirmed ? '1px solid #6fa07a' : '1px solid rgba(240,232,214,0.1)',
+                    background: msg.isConfirmed ? 'rgba(111,160,122,0.12)' : 'rgba(240,232,214,0.03)'
                   }}>
                     <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
                       <span>Booking Summary</span>
-                      {msg.isConfirmed && <span style={{ color: '#10b981' }}>Confirmed</span>}
+                      {msg.isConfirmed && <span style={{ color: '#6fa07a' }}>Confirmed</span>}
                     </div>
                     <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-                      <div style={{ width: '60px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', overflow: 'hidden' }}>
+                      <div style={{ width: '60px', height: '40px', background: 'rgba(240,232,214,0.05)', borderRadius: '6px', overflow: 'hidden' }}>
                         {msg.bookingData.vehicleDetails?.imageUrl && <img src={msg.bookingData.vehicleDetails.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                       </div>
                       <div>
@@ -505,18 +555,18 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                           display: 'flex',
                           gap: '12px',
                           transition: '0.3s',
-                          border: '1px solid rgba(255,255,255,0.05)'
+                          border: '1px solid rgba(240,232,214,0.05)'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                          e.currentTarget.style.background = 'rgba(240,232,214,0.05)';
                           e.currentTarget.style.borderColor = primaryColor;
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                          e.currentTarget.style.background = 'rgba(240,232,214,0.03)';
+                          e.currentTarget.style.borderColor = 'rgba(240,232,214,0.05)';
                         }}
                       >
-                        <div style={{ width: '80px', height: '50px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+                        <div style={{ width: '80px', height: '50px', background: 'rgba(240,232,214,0.05)', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
                           {car.imageUrl ? (
                             <img src={car.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
@@ -540,7 +590,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
             ))}
             {isLoading && (
               <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '32px', height: '32px', background: 'rgba(240,232,214,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Bot size={18} color={primaryColor} />
                 </div>
                 <div className="glass" style={{ padding: '12px 16px', borderRadius: '18px 18px 18px 4px' }}>
@@ -554,8 +604,8 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
           {/* Input */}
           <form onSubmit={handleSend} style={{
             padding: '20px',
-            background: '#16181d',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
+            background: '#241f18',
+            borderTop: '1px solid rgba(240,232,214,0.1)',
             display: 'flex',
             gap: '10px',
             alignItems: 'center'
@@ -567,7 +617,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                 width: '45px',
                 height: '45px',
                 borderRadius: '12px',
-                background: isRecording ? '#ef4444' : 'rgba(255,255,255,0.05)',
+                background: isRecording ? '#c65a48' : 'rgba(240,232,214,0.05)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -594,7 +644,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                 width: '45px',
                 height: '45px',
                 borderRadius: '12px',
-                background: input.trim() ? primaryColor : 'rgba(255,255,255,0.05)',
+                background: input.trim() ? primaryColor : 'rgba(240,232,214,0.05)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',

@@ -1,60 +1,69 @@
-/* Enterprise-focused landing styles: neutral palette, reduced chrome, no animations */
+/* LuxDrive landing — editorial, warm, unhurried. */
 .landingPage {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--background);
-    padding-bottom: 64px;
+    padding-bottom: 80px;
 }
 
 .navbar {
-    margin: 20px 40px;
-    padding: 12px 20px;
+    margin: 22px 40px 0;
+    padding: 14px 22px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: sticky;
-    top: 12px;
+    top: 14px;
     z-index: 100;
+    background: rgba(28, 24, 19, 0.72);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
 }
 
 .navLogo {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 18px;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
-.logoIcon {
-    color: var(--accent);
-}
+.logoIcon { color: var(--accent); }
 
 .navLinks {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
 }
 
 .loginLink {
     color: var(--text-secondary);
     font-weight: 500;
+    font-size: 15px;
+    transition: var(--transition);
 }
+.loginLink:hover { color: var(--text-primary); }
 
 .registerBtn {
     background: var(--accent);
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: white;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent-contrast);
+    transition: var(--transition);
 }
+.registerBtn:hover { background: var(--accent-hover); }
 
 .hero {
-    padding: 64px 40px;
+    padding: 90px 40px 64px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.05fr 0.95fr;
     align-items: center;
-    gap: 48px;
+    gap: 56px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -62,23 +71,25 @@
 .heroContent {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 22px;
 }
 
 .badge {
-    background: rgba(255,255,255,0.02);
-    color: var(--text-secondary);
-    padding: 6px 12px;
-    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 7px 14px;
+    border-radius: 999px;
     width: fit-content;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    border: 1px solid var(--border);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-strong);
 }
 
 .hero h1 {
-    font-size: 44px;
-    line-height: 1.08;
+    font-size: 56px;
+    line-height: 1.05;
     font-weight: 700;
 }
 
@@ -87,131 +98,148 @@
 }
 
 .hero p {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--text-secondary);
-    line-height: 1.5;
-    max-width: 560px;
+    line-height: 1.65;
+    max-width: 520px;
 }
 
 .heroActions {
     display: flex;
     gap: 14px;
-    margin-top: 12px;
+    margin-top: 14px;
 }
 
 .primaryBtn {
     background: var(--accent);
-    padding: 12px 20px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
+    padding: 14px 24px;
+    border-radius: var(--radius);
+    color: var(--accent-contrast);
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: var(--transition);
 }
+.primaryBtn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
 .secondaryBtn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
-    padding: 12px 20px;
-    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    padding: 14px 24px;
+    border-radius: var(--radius);
     color: var(--text-primary);
     font-weight: 600;
+    transition: var(--transition);
 }
+.secondaryBtn:hover { border-color: var(--accent); color: var(--accent); }
 
 .heroImage {
-    height: 380px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    background:
+        radial-gradient(120% 120% at 100% 0%, rgba(126,38,55,0.14), transparent 55%),
+        var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.heroImage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.5;
+    mask-image: radial-gradient(circle at center, black, transparent 75%);
 }
 
 .mockupContent {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
 }
 
 .mockupStat {
-    background: var(--surface);
-    padding: 14px 20px;
-    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 16px 22px;
+    border-radius: var(--radius);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    min-width: 240px;
+    box-shadow: var(--shadow-sm);
 }
+.mockupStat > svg { color: var(--accent); }
 
 .mockupStat span {
     display: block;
-    font-size: 13px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--text-secondary);
 }
 
 .mockupStat strong {
-    font-size: 16px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
     color: var(--text-primary);
 }
 
 .features {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 22px;
     padding: 32px;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .featureCard {
-    padding: 24px;
+    padding: 30px 26px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: rgba(255,255,255,0.01);
+    background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: var(--transition);
 }
+.featureCard:hover { border-color: var(--border-strong); transform: translateY(-3px); }
 
-.featureIcon {
-    color: var(--accent);
-}
+.featureIcon { color: var(--accent); margin-bottom: 6px; }
 
 .featureCard h3 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 500;
 }
 
 .featureCard p {
     color: var(--text-secondary);
-    line-height: 1.5;
-    font-size: 14px;
+    line-height: 1.6;
+    font-size: 15px;
 }
 
 @media (max-width: 1024px) {
     .hero {
         grid-template-columns: 1fr;
         text-align: center;
-        padding: 48px 20px;
+        padding: 64px 20px 40px;
     }
-
-    .heroContent {
-        align-items: center;
-    }
-
-    .hero h1 {
-        font-size: 36px;
-    }
-
-    .heroActions {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .features {
-        grid-template-columns: 1fr;
-    }
-
-    .heroImage {
-        display: none;
-    }
+    .heroContent { align-items: center; }
+    .hero h1 { font-size: 42px; }
+    .heroActions { flex-direction: column; width: 100%; }
+    .features { grid-template-columns: 1fr; }
+    .heroImage { display: none; }
+    .navbar { margin: 16px 16px 0; }
 }

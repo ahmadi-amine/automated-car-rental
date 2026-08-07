@@ -122,7 +122,7 @@ export default function PublicAgencyPage() {
 
     if (loading) {
         return (
-            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0b10', color: 'white' }}>
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#14110d', color: 'white' }}>
                 <div className="loader">Loading profile...</div>
             </div>
         );
@@ -130,20 +130,20 @@ export default function PublicAgencyPage() {
 
     if (!agency) {
         return (
-            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0b10', color: 'white' }}>
+            <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#14110d', color: 'white' }}>
                 <h1>Agency not found</h1>
             </div>
         );
     }
 
-    const primaryColor = agency.primaryColor || '#3b82f6';
+    const primaryColor = agency.primaryColor || '#7e2637';
 
     return (
-        <div style={{ background: '#0a0b10', minHeight: '100vh', color: 'white', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ background: '#14110d', minHeight: '100vh', color: 'white', fontFamily: 'var(--font-sans)' }}>
             {/* Banner */}
             <div style={{ 
                 height: '300px', 
-                background: agency.bannerUrl ? `url(${agency.bannerUrl}) center/cover` : `linear-gradient(135deg, ${primaryColor}dd 0%, #0a0b10 100%)`,
+                background: agency.bannerUrl ? `url(${agency.bannerUrl}) center/cover` : `linear-gradient(135deg, ${primaryColor}dd 0%, #14110d 100%)`,
                 position: 'relative'
             }}>
                 <div style={{ 
@@ -154,8 +154,8 @@ export default function PublicAgencyPage() {
                     width: '120px',
                     height: '120px',
                     borderRadius: '24px',
-                    background: '#16181d',
-                    border: '4px solid #0a0b10',
+                    background: '#241f18',
+                    border: '4px solid #14110d',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -173,14 +173,14 @@ export default function PublicAgencyPage() {
             {/* Header Info */}
             <div style={{ marginTop: '80px', textAlign: 'center', padding: '0 20px' }}>
                 <h1 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '8px' }}>{agency.name}</h1>
-                <p style={{ color: '#94a3b8', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>{agency.description}</p>
+                <p style={{ color: '#a99a83', fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>{agency.description}</p>
                 
                 <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a99a83' }}>
                         <ShieldCheck size={18} style={{ color: primaryColor }} />
                         <span>Min. Age: {agency.minAge}+</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a99a83' }}>
                         <DollarSign size={18} style={{ color: primaryColor }} />
                         <span>Deposit: {agency.depositAmount} MAD</span>
                     </div>
@@ -192,7 +192,7 @@ export default function PublicAgencyPage() {
                 <div>
                     <div className="glass" style={{ padding: '24px', borderRadius: '16px', marginBottom: '32px', display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
                         <div style={{ flex: 1 }}>
-                            <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Pick-up Date</label>
+                            <label style={{ fontSize: '12px', color: '#a99a83', textTransform: 'uppercase', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Pick-up Date</label>
                             <input 
                                 type="date" 
                                 className="input" 
@@ -202,7 +202,7 @@ export default function PublicAgencyPage() {
                             />
                         </div>
                         <div style={{ flex: 1 }}>
-                            <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Return Date</label>
+                            <label style={{ fontSize: '12px', color: '#a99a83', textTransform: 'uppercase', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Return Date</label>
                             <input 
                                 type="date" 
                                 className="input" 
@@ -215,13 +215,13 @@ export default function PublicAgencyPage() {
 
                     <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                         Agency Fleet
-                        <span style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '14px', color: primaryColor }}>{agency.vehicles?.length || 0} Total</span>
+                        <span style={{ padding: '4px 12px', background: 'rgba(240,232,214,0.05)', borderRadius: '20px', fontSize: '14px', color: primaryColor }}>{agency.vehicles?.length || 0} Total</span>
                     </h2>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                         {agency.vehicles?.map((v: any) => (
                             <div key={v.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', transition: '0.3s' }}>
-                                <div style={{ height: '200px', background: '#16181d', position: 'relative' }}>
+                                <div style={{ height: '200px', background: '#241f18', position: 'relative' }}>
                                     {v.imageUrl ? (
                                         <img src={v.imageUrl} alt={v.make} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
@@ -242,25 +242,25 @@ export default function PublicAgencyPage() {
                                 </div>
                                 <div style={{ padding: '20px' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>{v.make} {v.model}</h3>
-                                    <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '16px' }}>{v.year} • Automatic • Diesel</p>
+                                    <p style={{ color: '#a99a83', fontSize: '14px', marginBottom: '16px' }}>{v.year} • Automatic • Diesel</p>
                                     
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(240,232,214,0.1)', paddingTop: '16px' }}>
                                         <div>
                                             <span style={{ fontSize: '20px', fontWeight: '800', color: primaryColor }}>{v.pricePerDay} MAD</span>
-                                            <span style={{ fontSize: '14px', color: '#94a3b8' }}> / day</span>
+                                            <span style={{ fontSize: '14px', color: '#a99a83' }}> / day</span>
                                         </div>
                                         <button 
                                             onClick={() => !v.isBooked && handleBookNow(v)}
                                             disabled={v.isBooked}
                                             style={{ 
-                                                background: v.isBooked ? 'rgba(255,255,255,0.05)' : primaryColor, 
-                                                color: v.isBooked ? '#64748b' : 'white', 
+                                                background: v.isBooked ? 'rgba(240,232,214,0.05)' : primaryColor, 
+                                                color: v.isBooked ? '#837763' : 'white', 
                                                 padding: '8px 20px', 
                                                 borderRadius: '10px', 
                                                 fontWeight: '600',
                                                 fontSize: '14px',
                                                 cursor: v.isBooked ? 'not-allowed' : 'pointer',
-                                                border: v.isBooked ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                                                border: v.isBooked ? '1px solid rgba(240,232,214,0.1)' : 'none'
                                             }}
                                         >
                                             {v.isBooked ? 'Unavailable' : 'Book Now'}
@@ -276,14 +276,14 @@ export default function PublicAgencyPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     <div className="glass" style={{ padding: '24px', borderRadius: '16px' }}>
                         <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>About Agency</h3>
-                        <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '15px' }}>
+                        <p style={{ color: '#a99a83', lineHeight: '1.6', fontSize: '15px' }}>
                             {agency.bio || "No biography provided."}
                         </p>
                     </div>
 
                     <div className="glass" style={{ padding: '24px', borderRadius: '16px' }}>
                         <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Rental Conditions</h3>
-                        <div style={{ color: '#94a3b8', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ color: '#a99a83', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {agency.rentalConditions ? agency.rentalConditions.split('\n').map((condition: string, i: number) => (
                                 <div key={i} style={{ display: 'flex', gap: '10px' }}>
                                     <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: primaryColor }} />
@@ -295,7 +295,7 @@ export default function PublicAgencyPage() {
 
                     <div className="glass" style={{ padding: '24px', borderRadius: '16px' }}>
                         <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Contact Details</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#a99a83' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <MapPin size={18} />
                                 <span>{agency.address || 'Address not listed'}</span>
@@ -317,7 +317,7 @@ export default function PublicAgencyPage() {
             {showBookingModal && (
                 <div className="modalOverlay" style={{ 
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+                    background: 'rgba(10,8,6,0.72)', backdropFilter: 'blur(6px)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
                     padding: '20px'
                 }}>
@@ -335,12 +335,12 @@ export default function PublicAgencyPage() {
                         {bookingStep === 1 ? (
                             <>
                                 <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>Complete Your Booking</h2>
-                                <p style={{ color: '#94a3b8', marginBottom: '24px' }}>Renting {selectedVehicle?.make} {selectedVehicle?.model}</p>
+                                <p style={{ color: '#a99a83', marginBottom: '24px' }}>Renting {selectedVehicle?.make} {selectedVehicle?.model}</p>
 
                                 <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>First Name</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>First Name</label>
                                             <input 
                                                 type="text" className="input" required 
                                                 value={bookingForm.firstName}
@@ -348,7 +348,7 @@ export default function PublicAgencyPage() {
                                             />
                                         </div>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Last Name</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Last Name</label>
                                             <input 
                                                 type="text" className="input" required 
                                                 value={bookingForm.lastName}
@@ -359,7 +359,7 @@ export default function PublicAgencyPage() {
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Email Address</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Email Address</label>
                                             <input 
                                                 type="email" className="input" required 
                                                 value={bookingForm.email}
@@ -367,7 +367,7 @@ export default function PublicAgencyPage() {
                                             />
                                         </div>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Phone Number</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Phone Number</label>
                                             <input 
                                                 type="tel" className="input" required 
                                                 value={bookingForm.phone}
@@ -378,7 +378,7 @@ export default function PublicAgencyPage() {
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Start Date</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Start Date</label>
                                             <input 
                                                 type="date" className="input" required 
                                                 value={bookingForm.startDate}
@@ -387,7 +387,7 @@ export default function PublicAgencyPage() {
                                             />
                                         </div>
                                         <div className="inputGroup">
-                                            <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>End Date</label>
+                                            <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>End Date</label>
                                             <input 
                                                 type="date" className="input" required 
                                                 value={bookingForm.endDate}
@@ -398,7 +398,7 @@ export default function PublicAgencyPage() {
                                     </div>
 
                                     <div className="inputGroup">
-                                        <label className="label" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Driving License Number (Optional)</label>
+                                        <label className="label" style={{ color: '#a99a83', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Driving License Number (Optional)</label>
                                         <input 
                                             type="text" className="input" 
                                             value={bookingForm.licenseNumber}
@@ -407,11 +407,11 @@ export default function PublicAgencyPage() {
                                     </div>
 
                                     <div style={{ 
-                                        marginTop: '12px', padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px',
+                                        marginTop: '12px', padding: '20px', background: 'rgba(240,232,214,0.03)', borderRadius: '16px',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                     }}>
                                         <div>
-                                            <span style={{ color: '#94a3b8', fontSize: '14px' }}>Total Amount</span>
+                                            <span style={{ color: '#a99a83', fontSize: '14px' }}>Total Amount</span>
                                             <h3 style={{ fontSize: '24px', fontWeight: '800', color: primaryColor }}>{calculateTotal()} MAD</h3>
                                         </div>
                                         <button 
@@ -431,7 +431,7 @@ export default function PublicAgencyPage() {
                             <div style={{ textAlign: 'center', padding: '40px 0' }}>
                                 <CheckCircle2 size={80} style={{ color: '#10b981', marginBottom: '24px' }} />
                                 <h2 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '12px' }}>Request Received!</h2>
-                                <p style={{ color: '#94a3b8', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 32px' }}>
+                                <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 32px' }}>
                                     Your booking request for the <strong>{selectedVehicle?.make} {selectedVehicle?.model}</strong> has been sent to the agency. They will contact you shortly to confirm.
                                 </p>
                                 <button 

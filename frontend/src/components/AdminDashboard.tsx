@@ -35,7 +35,7 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                             <div className="statSmall">Monthly net revenue across all agencies</div>
                         </div>
                         <div className="statChart">
-                            <Sparkline values={[1200, 1500, 1800, 1600, 4200, 3800, stats.totalRevenue || 0]} stroke="#10b981" />
+                            <Sparkline values={[1200, 1500, 1800, 1600, 4200, 3800, stats.totalRevenue || 0]} stroke="#6fa07a" />
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                             <div className="statSmall">Active agency accounts</div>
                         </div>
                         <div className="statChart">
-                            <Sparkline values={[50, 55, 60, 62, 70, 72, stats.totalAgencies || 0]} stroke="#6b7280" />
+                            <Sparkline values={[50, 55, 60, 62, 70, 72, stats.totalAgencies || 0]} stroke="#837763" />
                         </div>
                     </div>
                 </div>
@@ -63,11 +63,11 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                     </div>
                     <div className="statBody">
                         <div>
-                            <p className="statValue" style={{ color: stats.pendingAgencies > 0 ? '#f59e0b' : 'inherit' }}>{stats.pendingAgencies}</p>
+                            <p className="statValue" style={{ color: stats.pendingAgencies > 0 ? '#d6a04b' : 'inherit' }}>{stats.pendingAgencies}</p>
                             <div className="statSmall">Agencies awaiting admin approval</div>
                         </div>
                         <div className="statChart">
-                            <Sparkline values={[2,1,0,3,1,stats.pendingAgencies || 0]} stroke="#f59e0b" />
+                            <Sparkline values={[2,1,0,3,1,stats.pendingAgencies || 0]} stroke="#d6a04b" />
                         </div>
                     </div>
                 </div>
@@ -83,7 +83,7 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                             <div className="statSmall">Available and listed vehicles</div>
                         </div>
                         <div className="statChart">
-                            <Sparkline values={[900,920,940,950,960,970, stats.totalVehicles || 0]} stroke="#93c5fd" />
+                            <Sparkline values={[900,920,940,950,960,970, stats.totalVehicles || 0]} stroke="#7e2637" />
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                             <div className="statSmall">Recent confirmed bookings</div>
                         </div>
                         <div className="statChart">
-                            <Sparkline values={[30,28,35,40,38,42, stats.totalBookings || 0]} stroke="#60a5fa" />
+                            <Sparkline values={[30,28,35,40,38,42, stats.totalBookings || 0]} stroke="#a8465a" />
                         </div>
                     </div>
                 </div>

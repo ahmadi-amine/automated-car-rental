@@ -1,35 +1,90 @@
 :root {
-  /* Neutral enterprise palette - subdued, professional */
-  --background: #0f1720; /* deep neutral */
-  --foreground: #e6eef3; /* main text */
-  --surface: #0b0e11; /* card surface */
-  --surface-hover: #0f1418;
-  --accent: #2563eb; /* subdued blue */
-  --accent-secondary: #1f6feb;
+  /* ── LuxDrive "Atelier" palette ────────────────────────────────
+     Warm, cinematic showroom dark. Espresso neutrals + brass accent.
+     Deliberately not blue-black; deliberately not neon.               */
+
+  /* Neutrals (warm) */
+  --background: #14110d;      /* app canvas — warm near-black */
+  --surface: #1c1813;         /* card / panel */
+  --surface-2: #241f18;       /* raised, hover, media wells */
+  --surface-hover: #2a241c;
+
+  /* Text */
+  --foreground: #efe7d7;      /* warm ivory */
+  --text-primary: #efe7d7;
+  --text-secondary: #a99a83;  /* warm taupe */
+  --text-muted: #837763;      /* dimmer captions */
+
+  /* Lines — warm hairlines, not cold white */
+  --border: rgba(240, 232, 214, 0.10);
+  --border-strong: rgba(240, 232, 214, 0.20);
+
+  /* Brand — deep burgundy (wine / oxblood) */
+  --accent: #7e2637;
+  --accent-hover: #9a3247;
+  --accent-strong: #611a29;
+  --accent-soft: rgba(126, 38, 55, 0.18);
+  --accent-contrast: #f6ebe9; /* warm cream for text on burgundy */
+  --accent-secondary: #7e2637;
   --accent-gradient: var(--accent);
-  --text-primary: #e6eef3;
-  --text-secondary: #9aa6b2; /* muted secondary text */
-  --border: rgba(255, 255, 255, 0.06);
-  --error: #ef4444;
-  --success: #10b981;
-  --shadow: 0 6px 18px rgba(2,6,23,0.6);
-  --transition: all 0.18s ease;
+
+  /* A muted brass, kept only as a subtle metallic hairline detail */
+  --gilt: #b08a4f;
+  /* Occasional Moroccan warmth (used sparingly) */
+  --clay: #b5502e;
+
+  /* Status */
+  --success: #6fa07a;
+  --success-soft: rgba(111, 160, 122, 0.14);
+  --warning: #d6a04b;
+  --error: #c65a48;
+  --error-soft: rgba(198, 90, 72, 0.14);
+
+  --shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --radius: 6px;
+  --radius-lg: 14px;
+  --transition: all 0.2s cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  --font-mont: var(--font-montserrat, 'Montserrat'), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-mont);
+  --font-display: var(--font-mont);
+  --font-luxe: var(--font-mont);
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background-color: var(--background);
+  /* subtle warm vignette so large dark areas read as "lit room", not flat */
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(126, 38, 55, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(181, 80, 46, 0.05), transparent 55%);
+  background-attachment: fixed;
   color: var(--foreground);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv01";
+  letter-spacing: 0.005em;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 a {
@@ -44,46 +99,39 @@ button {
   font-family: inherit;
 }
 
-input {
+input, textarea, select {
   outline: none;
+  font-family: inherit;
 }
 
-/* Simplified card style (no glassmorphism) */
+/* Card surface — solid, warm, hairline-framed. No glass blur. */
 .glass {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px; /* reduced rounding */
+  border-radius: var(--radius-lg);
 }
 
-/* Modal panels inside overlays should be near-opaque to avoid background bleed-through */
+/* Modal panels — opaque warm surface with a stronger frame */
 .modalOverlay .glass,
 .modalContent,
 .modalPanel {
-  background-color: rgba(11,14,17,0.98) !important; /* near-opaque surface */
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important;
-  backdrop-filter: none !important; /* disable glass blur for modal panels */
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: none !important;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface);
+  background: var(--surface-2);
   border-radius: 10px;
+  border: 2px solid var(--background);
 }
+::-webkit-scrollbar-thumb:hover { background: var(--surface-hover); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-hover);
-}
-
-/* Form Styles */
+/* ── Forms ── */
 .inputGroup {
   display: flex;
   flex-direction: column;
@@ -91,81 +139,79 @@ input {
 }
 
 .label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text-secondary);
-  margin-left: 4px;
+  margin-left: 2px;
 }
 
 .input {
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--text-primary);
   font-size: 15px;
   transition: var(--transition);
   outline: none;
 }
 
+.input::placeholder { color: var(--text-muted); }
+
 .input:focus {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: 0 4px 12px rgba(2,6,23,0.45);
+  background: var(--surface-hover);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* For inputs with icons */
-.inputWithIcon {
-  padding-left: 48px;
-}
+.inputWithIcon { padding-left: 48px; }
 
 select.input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a99a83' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
   padding-right: 40px;
 }
 
-select.input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+select.input:disabled { opacity: 0.5; cursor: not-allowed; }
+select.input option { background: #211c16; color: var(--text-primary); }
 
-select.input option {
-  background: #1a1c23;
-  /* Darker solid background for dropdown options */
-  color: var(--text-primary);
-}
-
+/* Primary action — gold with dark ink. Reads premium, not "SaaS blue". */
 .submitBtn {
-  padding: 12px 16px;
+  padding: 13px 18px;
   background: var(--accent);
-  border-radius: 8px;
-  color: white;
-  font-weight: 600;
-  font-size: 15px;
+  border-radius: var(--radius);
+  color: var(--accent-contrast);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
-.submitBtn:hover {
-  transform: none;
-  box-shadow: 0 8px 20px rgba(2,6,23,0.5);
-}
+.submitBtn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.submitBtn:active { transform: translateY(0); }
+.submitBtn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-.submitBtn:active {
-  transform: translateY(0);
-}
-
-.submitBtn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+/* Utility: small brass-outline pill used for tags/labels */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
 }

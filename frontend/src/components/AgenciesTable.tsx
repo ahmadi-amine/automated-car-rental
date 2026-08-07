@@ -67,8 +67,8 @@ export default function AgenciesTable() {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h2>Agencies</h2>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input placeholder="Search by name or email" value={query} onChange={e => setQuery(e.target.value)} style={{ padding: '8px 12px', borderRadius: 8, background: '#0b1220', color: '#e6eef8', border: '1px solid #1f2937' }} />
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} style={{ padding: '8px 12px', borderRadius: 8, background: '#0b1220', color: '#e6eef8', border: '1px solid #1f2937' }}>
+                    <input placeholder="Search by name or email" value={query} onChange={e => setQuery(e.target.value)} style={{ padding: '8px 12px', borderRadius: 8, background: '#241f18', color: '#efe7d7', border: '1px solid rgba(240,232,214,0.18)' }} />
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} style={{ padding: '8px 12px', borderRadius: 8, background: '#241f18', color: '#efe7d7', border: '1px solid rgba(240,232,214,0.18)' }}>
                         <option value="all">All</option>
                         <option value="approved">Approved</option>
                         <option value="pending">Pending</option>
@@ -76,8 +76,8 @@ export default function AgenciesTable() {
                 </div>
             </header>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#e6eef8' }}>
-                <thead style={{ color: '#94a3b8', textTransform: 'uppercase', fontSize: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#efe7d7' }}>
+                <thead style={{ color: '#a99a83', textTransform: 'uppercase', fontSize: 12 }}>
                     <tr>
                         <th style={{ textAlign: 'left', padding: '10px 12px' }}>Agency</th>
                         <th style={{ textAlign: 'left', padding: '10px 12px' }}>Email</th>
@@ -95,7 +95,7 @@ export default function AgenciesTable() {
                         <tr><td colSpan={7} style={{ padding: 20 }}>No agencies found.</td></tr>
                     ) : (
                         filtered.map(a => (
-                            <tr key={a.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                            <tr key={a.id} style={{ borderBottom: '1px solid rgba(240,232,214,0.06)' }}>
                                 <td style={{ padding: '12px' }}>{a.agency?.name || 'N/A'}</td>
                                 <td style={{ padding: '12px' }}>{a.email}</td>
                                 <td style={{ padding: '12px' }}>{a.fleetCount ?? 0}</td>
@@ -104,9 +104,9 @@ export default function AgenciesTable() {
                                 <td style={{ padding: '12px' }}>{a.isApproved ? 'Approved' : 'Pending'}</td>
                                 <td style={{ padding: '12px', display: 'flex', gap: 8 }}>
                                     {a.isApproved ? (
-                                        <button onClick={() => handleSuspend(a.id)} style={{ background: '#b91c1c', color: '#fff', padding: '8px 10px', borderRadius: 8 }}>Suspend</button>
+                                        <button onClick={() => handleSuspend(a.id)} style={{ background: '#a5432f', color: '#fff', padding: '8px 10px', borderRadius: 8 }}>Suspend</button>
                                     ) : (
-                                        <button onClick={() => handleApprove(a.id)} style={{ background: '#059669', color: '#fff', padding: '8px 10px', borderRadius: 8 }}>Approve</button>
+                                        <button onClick={() => handleApprove(a.id)} style={{ background: '#4f7d5e', color: '#fff', padding: '8px 10px', borderRadius: 8 }}>Approve</button>
                                     )}
                                 </td>
                             </tr>
