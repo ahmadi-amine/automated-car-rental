@@ -30,6 +30,10 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+# prisma.config.js (CommonJS) supplies the datasource URL for `migrate deploy`
+COPY --from=builder /app/prisma.config.js ./
+COPY --from=builder /app/docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 
 # Create uploads directory (persistent via volume)
 RUN mkdir -p /app/uploads
@@ -37,5 +41,5 @@ RUN mkdir -p /app/uploads
 # Expose the port the app runs on
 EXPOSE 3001
 
-# Command to run the app
-CMD ["node", "dist/src/main"]
+# Apply migrations, then start the server
+CMD ["./docker-entrypoint.sh"]
