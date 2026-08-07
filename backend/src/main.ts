@@ -14,7 +14,12 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
-  app.enableCors();
+  // Restrict CORS to configured origins in production (comma-separated CORS_ORIGIN).
+  // Falls back to permissive when unset, for local development convenience.
+  const corsOrigin = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+    : true;
+  app.enableCors({ origin: corsOrigin, credentials: true });
 
   await app.listen(process.env.PORT ?? 3000);
 }
