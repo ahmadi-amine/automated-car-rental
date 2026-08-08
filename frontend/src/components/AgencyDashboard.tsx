@@ -112,6 +112,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const [customerSearch, setCustomerSearch] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+    const [noteDraft, setNoteDraft] = useState('');
+    const [isSavingNote, setIsSavingNote] = useState(false);
     const [makes, setMakes] = useState<CarMake[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [loadingModels, setLoadingModels] = useState(false);
@@ -234,12 +236,38 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             const res = await fetch(`${getApiUrl()}/api/customers/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setSelectedCustomer(res.ok ? await res.json() : null);
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedCustomer(data);
+                setNoteDraft(data.note || '');
+            } else {
+                setSelectedCustomer(null);
+            }
         } catch (err) {
             console.error('Failed to fetch customer', err);
             setSelectedCustomer(null);
         } finally {
             setIsLoadingDetail(false);
+        }
+    };
+
+    const saveNote = async () => {
+        if (!selectedCustomer?.customer) return;
+        setIsSavingNote(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/customers/${selectedCustomer.customer.id}/notes`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ notes: noteDraft }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedCustomer((prev: any) => ({ ...prev, note: data.notes }));
+            }
+        } catch (err) {
+            console.error('Failed to save note', err);
+        } finally {
+            setIsSavingNote(false);
         }
     };
 
@@ -1274,6 +1302,26 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+
+                                <h3 style={{ fontSize: 15, margin: '22px 0 10px' }}>Notes internes</h3>
+                                <textarea
+                                    value={noteDraft}
+                                    onChange={(e) => setNoteDraft(e.target.value)}
+                                    placeholder="Notes visibles uniquement par votre agence (préférences, incidents, remarques...)"
+                                    rows={3}
+                                    className="input"
+                                    style={{ resize: 'vertical', width: '100%' }}
+                                />
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                    <button
+                                        className="submitBtn"
+                                        onClick={saveNote}
+                                        disabled={isSavingNote || noteDraft === (selectedCustomer.note || '')}
+                                        style={{ width: 'auto', padding: '10px 22px' }}
+                                    >
+                                        {isSavingNote ? <Loader2 size={16} className="animate-spin" /> : 'Enregistrer la note'}
+                                    </button>
                                 </div>
                             </>
                         )}
