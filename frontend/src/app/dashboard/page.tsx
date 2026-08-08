@@ -42,7 +42,7 @@ export default function DashboardPage() {
         try {
             const params = new URLSearchParams(window.location.search);
             const v = params.get('view');
-            if (v && ['dashboard', 'fleet', 'bookings', 'settings', 'agencies'].includes(v)) {
+            if (v && ['dashboard', 'fleet', 'bookings', 'clients', 'settings', 'agencies'].includes(v)) {
                 setActiveTab(v);
             }
         } catch (err) {
@@ -125,6 +125,7 @@ export default function DashboardPage() {
                 case 'dashboard':
                 case 'fleet':
                 case 'bookings':
+                case 'clients':
                 case 'settings':
                     return <AgencyDashboard
                         token={token!}
@@ -181,6 +182,13 @@ export default function DashboardPage() {
                             >
                                 <Calendar size={20} />
                                 <span>Bookings</span>
+                            </div>
+                            <div
+                                className={`navItem ${activeTab === 'clients' ? 'active' : ''}`}
+                                onClick={() => { setActiveTab('clients'); router.push('/dashboard?view=clients'); }}
+                            >
+                                <Users size={20} />
+                                <span>Clients</span>
                             </div>
                         </>
                     )}

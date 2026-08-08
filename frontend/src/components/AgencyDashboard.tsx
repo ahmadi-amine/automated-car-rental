@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { getApiUrl } from '@/utils/api';
-import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone } from 'lucide-react';
 import { carApi, CarMake, CarModel } from '../utils/carApi';
 
 interface AgencyDashboardProps {
     token: string;
-    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings';
+    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings' | 'clients';
 }
 
 // Searchable Select Component
@@ -107,6 +107,11 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const [bookings, setBookings] = useState<any[]>([]);
     const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+    const [customers, setCustomers] = useState<any[]>([]);
+    const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
+    const [customerSearch, setCustomerSearch] = useState('');
+    const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
     const [makes, setMakes] = useState<CarMake[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [loadingModels, setLoadingModels] = useState(false);
@@ -147,6 +152,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         fetchMakes();
         fetchProfile();
         fetchBookings();
+        fetchCustomers();
     }, []);
 
     const fetchVehicles = async () => {
@@ -204,6 +210,36 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             console.error('Failed to fetch bookings', err);
         } finally {
             setIsLoadingBookings(false);
+        }
+    };
+
+    const fetchCustomers = async () => {
+        setIsLoadingCustomers(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/customers`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) setCustomers(await res.json());
+        } catch (err) {
+            console.error('Failed to fetch customers', err);
+        } finally {
+            setIsLoadingCustomers(false);
+        }
+    };
+
+    const openCustomer = async (id: string) => {
+        setIsLoadingDetail(true);
+        setSelectedCustomer({ loading: true });
+        try {
+            const res = await fetch(`${getApiUrl()}/api/customers/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSelectedCustomer(res.ok ? await res.json() : null);
+        } catch (err) {
+            console.error('Failed to fetch customer', err);
+            setSelectedCustomer(null);
+        } finally {
+            setIsLoadingDetail(false);
         }
     };
 
@@ -1111,12 +1147,77 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         );
     };
 
+    const renderCustomers = () => {
+        const q = customerSearch.trim().toLowerCase();
+        const filtered = q
+            ? customers.filter(c =>
+                `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+                (c.email || '').toLowerCase().includes(q) ||
+                (c.phone || '').toLowerCase().includes(q))
+            : customers;
+
+        return (
+            <div>
+                <header className="header" style={{ marginBottom: 24 }}>
+                    <h1>Clients</h1>
+                    <div style={{ position: 'relative', marginLeft: 'auto' }}>
+                        <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#837763' }} />
+                        <input
+                            className="input"
+                            placeholder="Rechercher un client..."
+                            value={customerSearch}
+                            onChange={(e) => setCustomerSearch(e.target.value)}
+                            style={{ paddingLeft: 36, width: 280 }}
+                        />
+                    </div>
+                </header>
+
+                <div className="glass" style={{ padding: 8 }}>
+                    {isLoadingCustomers ? (
+                        <div className="emptyState">Chargement des clients...</div>
+                    ) : filtered.length === 0 ? (
+                        <div className="emptyState">Aucun client pour le moment. Les clients apparaissent après leur première réservation.</div>
+                    ) : (
+                        <div className="tableContainer">
+                            <table className="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Client</th>
+                                        <th>Contact</th>
+                                        <th>Réservations</th>
+                                        <th>Total dépensé</th>
+                                        <th>Dernière location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map(c => (
+                                        <tr key={c.id} onClick={() => openCustomer(c.id)} style={{ cursor: 'pointer' }}>
+                                            <td className="agencyNameCol">{c.firstName} {c.lastName}</td>
+                                            <td>
+                                                <div style={{ fontSize: 13 }}>{c.email}</div>
+                                                <div style={{ fontSize: 12, color: '#a99a83' }}>{c.phone}</div>
+                                            </td>
+                                            <td>{c.reservationsCount} <span style={{ color: '#a99a83', fontSize: 12 }}>({c.confirmedCount} confirmées)</span></td>
+                                            <td style={{ fontWeight: 700, color: 'var(--accent)' }}>{Math.round(c.totalSpent).toLocaleString()} MAD</td>
+                                            <td>{c.lastRentalDate ? new Date(c.lastRentalDate).toLocaleDateString() : '—'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         switch (view) {
             case 'dashboard': return renderDashboard();
             case 'fleet': return renderFleet();
             case 'settings': return renderSettings();
             case 'bookings': return renderBookings();
+            case 'clients': return renderCustomers();
             default: return renderDashboard();
         }
     };
@@ -1124,6 +1225,61 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     return (
         <>
             {renderContent()}
+
+            {selectedCustomer && (
+                <div className="modalOverlay" onClick={() => setSelectedCustomer(null)}>
+                    <div className="modalContent glass" style={{ maxWidth: 640 }} onClick={(e) => e.stopPropagation()}>
+                        {(isLoadingDetail || selectedCustomer.loading) ? (
+                            <div className="emptyState"><Loader2 className="animate-spin" /></div>
+                        ) : (
+                            <>
+                                <div className="modalHeader">
+                                    <h2>{selectedCustomer.customer.firstName} {selectedCustomer.customer.lastName}</h2>
+                                    <button onClick={() => setSelectedCustomer(null)} className="closeBtn"><X size={24} /></button>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, color: '#a99a83', fontSize: 14 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Mail size={15} /> {selectedCustomer.customer.email}</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Phone size={15} /> {selectedCustomer.customer.phone}</div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+                                    {[
+                                        { label: 'Réservations', value: selectedCustomer.stats.reservationsCount, accent: false },
+                                        { label: 'Confirmées', value: selectedCustomer.stats.confirmedCount, accent: false },
+                                        { label: 'Total dépensé', value: `${Math.round(selectedCustomer.stats.totalSpent).toLocaleString()} MAD`, accent: true },
+                                    ].map((s) => (
+                                        <div key={s.label} style={{ padding: 14, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8 }}>
+                                            <div style={{ fontSize: 11, textTransform: 'uppercase', color: '#a99a83', letterSpacing: '0.08em' }}>{s.label}</div>
+                                            <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4, color: s.accent ? 'var(--accent)' : 'var(--text-primary)' }}>{s.value}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <h3 style={{ fontSize: 15, marginBottom: 12 }}>Historique des locations</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 260, overflowY: 'auto' }}>
+                                    {selectedCustomer.bookings.map((b: any) => (
+                                        <div key={b.id} style={{ padding: '12px 14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>{b.vehicle?.make} {b.vehicle?.model}</div>
+                                                <div style={{ fontSize: 12, color: '#a99a83' }}>{new Date(b.startDate).toLocaleDateString()} → {new Date(b.endDate).toLocaleDateString()}</div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontWeight: 700 }}>{Math.round(b.totalPrice).toLocaleString()} MAD</div>
+                                                <span style={{
+                                                    fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase',
+                                                    background: b.status === 'CONFIRMED' ? 'var(--success-soft)' : b.status === 'CANCELLED' ? 'var(--error-soft)' : b.status === 'PENDING' ? 'rgba(214,160,75,0.14)' : 'rgba(131,119,99,0.14)',
+                                                    color: b.status === 'CONFIRMED' ? 'var(--success)' : b.status === 'CANCELLED' ? 'var(--error)' : b.status === 'PENDING' ? 'var(--warning)' : 'var(--text-secondary)'
+                                                }}>{b.status}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {showAddModal && (
                 <div className="modalOverlay">
