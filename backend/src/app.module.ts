@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 import { BookingModule } from './booking/booking.module';
 import { AiModule } from './ai/ai.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AiModule } from './ai/ai.module';
     VehicleModule,
     BookingModule,
     AiModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
