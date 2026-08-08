@@ -25,9 +25,10 @@ export class BookingService {
             throw new BadRequestException('Vehicle is not available for these dates');
         }
 
-        // Create or find customer
+        // Create or find customer (normalize email so the same person maps to one record)
+        const email = dto.email.trim().toLowerCase();
         let customer = await this.prisma.customer.findFirst({
-            where: { email: dto.email }
+            where: { email }
         });
 
         if (!customer) {
@@ -35,7 +36,7 @@ export class BookingService {
                 data: {
                     firstName: dto.firstName,
                     lastName: dto.lastName,
-                    email: dto.email,
+                    email,
                     phone: dto.phone,
                     licenseNumber: dto.licenseNumber
                 }
