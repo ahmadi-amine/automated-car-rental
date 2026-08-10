@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ExpenseService {
@@ -59,8 +61,31 @@ export class ExpenseService {
     }
 
     async remove(userId: string, id: string) {
-        await this.getOwnedExpense(userId, id);
+        const expense = await this.getOwnedExpense(userId, id);
+        if (expense.invoiceUrl) this.deleteInvoiceFile(expense.invoiceUrl);
         await this.prisma.expense.delete({ where: { id } });
         return { deleted: true };
+    }
+
+    async updateInvoiceUrl(userId: string, id: string, invoiceUrl: string) {
+        const expense = await this.getOwnedExpense(userId, id);
+        if (expense.invoiceUrl) this.deleteInvoiceFile(expense.invoiceUrl);
+        return this.prisma.expense.update({
+            where: { id },
+            data: { invoiceUrl },
+            include: { vehicle: { select: { make: true, model: true, year: true } } },
+        });
+    }
+
+    private deleteInvoiceFile(url: string) {
+        try {
+            const fileName = url.split('/').pop();
+            if (fileName) {
+                const filePath = path.join(process.cwd(), 'uploads', fileName);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+        } catch (err) {
+            console.error('Failed to delete invoice file:', err);
+        }
     }
 }
