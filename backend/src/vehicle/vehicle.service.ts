@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException,
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { AiService } from '../ai/ai.service';
+import { BookingStatus } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -81,6 +82,53 @@ export class VehicleService {
             where: { agencyId: user.agency.id },
             orderBy: { createdAt: 'desc' },
         });
+    }
+
+    /**
+     * Per-vehicle profitability: realized revenue (confirmed bookings) minus
+     * recorded expenses, with a maintenance/repair cost breakdown.
+     */
+    async getProfitability(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { agency: true },
+        });
+
+        if (!user || !user.agency) {
+            throw new NotFoundException('Agency not found.');
+        }
+
+        const vehicles = await this.prisma.vehicle.findMany({
+            where: { agencyId: user.agency.id },
+            include: {
+                bookings: { where: { status: BookingStatus.CONFIRMED }, select: { totalPrice: true } },
+                expenses: { select: { amount: true, type: true } },
+            },
+        });
+
+        return vehicles
+            .map((v) => {
+                const rentalsCount = v.bookings.length;
+                const revenue = v.bookings.reduce((s, b) => s + b.totalPrice, 0);
+                const maintenanceCost = v.expenses.filter((e) => e.type === 'MAINTENANCE').reduce((s, e) => s + e.amount, 0);
+                const repairCost = v.expenses.filter((e) => e.type === 'REPAIR').reduce((s, e) => s + e.amount, 0);
+                const expensesTotal = v.expenses.reduce((s, e) => s + e.amount, 0);
+                return {
+                    id: v.id,
+                    make: v.make,
+                    model: v.model,
+                    year: v.year,
+                    category: v.category,
+                    imageUrl: v.imageUrl,
+                    rentalsCount,
+                    revenue,
+                    maintenanceCost,
+                    repairCost,
+                    expensesTotal,
+                    profit: revenue - expensesTotal,
+                };
+            })
+            .sort((a, b) => b.profit - a.profit);
     }
 
     async findOne(id: string, userId: string) {

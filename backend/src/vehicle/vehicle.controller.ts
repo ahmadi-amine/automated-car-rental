@@ -42,6 +42,12 @@ export class VehicleController {
         return this.vehicleService.findAll(req.user.userId);
     }
 
+    @Get('profitability')
+    @Roles(Role.AGENCY)
+    getProfitability(@Req() req: any) {
+        return this.vehicleService.getProfitability(req.user.userId);
+    }
+
     @Get(':id')
     @Roles(Role.AGENCY)
     findOne(@Req() req: any, @Param('id') id: string) {
