@@ -46,6 +46,13 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum ExpenseType {
+  REPAIR
+  MAINTENANCE
+  INSURANCE
+  OTHER
+}
+
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
@@ -81,6 +88,7 @@ model Agency {
   vehicles      Vehicle[]
   bookings      Booking[]
   customerNotes AgencyCustomerNote[]
+  expenses      Expense[]
 }
 
 model Vehicle {
@@ -99,6 +107,7 @@ model Vehicle {
   agencyId String
   agency   Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   bookings Booking[]
+  expenses Expense[]
 }
 
 model Customer {
@@ -127,6 +136,26 @@ model AgencyCustomerNote {
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([agencyId, customerId])
+}
+
+// A vehicle-related expense (repair, maintenance, insurance...) recorded by an agency.
+model Expense {
+  id          String      @id @default(uuid())
+  type        ExpenseType @default(OTHER)
+  amount      Float
+  description String?
+  date        DateTime    @default(now())
+  invoiceUrl  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  agencyId  String
+  agency    Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([agencyId])
 }
 
 model Booking {
