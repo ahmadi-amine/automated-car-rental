@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { getApiUrl } from '@/utils/api';
-import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone } from 'lucide-react';
+import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone, Receipt, FileText } from 'lucide-react';
 import { carApi, CarMake, CarModel } from '../utils/carApi';
 
 interface AgencyDashboardProps {
     token: string;
-    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings' | 'clients';
+    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings' | 'clients' | 'expenses';
 }
 
 // Searchable Select Component
@@ -114,6 +114,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
     const [noteDraft, setNoteDraft] = useState('');
     const [isSavingNote, setIsSavingNote] = useState(false);
+    const [expenses, setExpenses] = useState<any[]>([]);
+    const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
+    const [expenseVehicleFilter, setExpenseVehicleFilter] = useState('');
+    const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [makes, setMakes] = useState<CarMake[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [loadingModels, setLoadingModels] = useState(false);
@@ -155,6 +159,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         fetchProfile();
         fetchBookings();
         fetchCustomers();
+        fetchExpenses();
     }, []);
 
     const fetchVehicles = async () => {
@@ -270,6 +275,23 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             setIsSavingNote(false);
         }
     };
+
+    const fetchExpenses = async () => {
+        setIsLoadingExpenses(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/expenses`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) setExpenses(await res.json());
+        } catch (err) {
+            console.error('Failed to fetch expenses', err);
+        } finally {
+            setIsLoadingExpenses(false);
+        }
+    };
+
+    const expenseTypeLabel = (t: string) =>
+        ({ REPAIR: 'Réparation', MAINTENANCE: 'Entretien', INSURANCE: 'Assurance', OTHER: 'Autre' } as Record<string, string>)[t] || t;
 
     const handleUpdateBookingStatus = async (id: string, status: string) => {
         try {
@@ -1239,6 +1261,63 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         );
     };
 
+    const renderExpenses = () => {
+        const filtered = expenseVehicleFilter ? expenses.filter(e => e.vehicleId === expenseVehicleFilter) : expenses;
+        const total = filtered.reduce((s, e) => s + e.amount, 0);
+        return (
+            <div>
+                <header className="header" style={{ marginBottom: 24 }}>
+                    <h1>Dépenses</h1>
+                    <button className="submitBtn" onClick={() => setShowExpenseModal(true)} style={{ width: 'auto', padding: '10px 18px', marginLeft: 'auto' }}>
+                        <Plus size={18} /> Ajouter une dépense
+                    </button>
+                </header>
+
+                <div style={{ display: 'flex', gap: 16, marginBottom: 20, alignItems: 'center' }}>
+                    <select className="input" value={expenseVehicleFilter} onChange={(e) => setExpenseVehicleFilter(e.target.value)} style={{ width: 280 }}>
+                        <option value="">Tous les véhicules</option>
+                        {vehicles.map(v => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
+                    </select>
+                    <div style={{ marginLeft: 'auto', fontSize: 14, color: '#a99a83' }}>
+                        Total : <span style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 18 }}>{Math.round(total).toLocaleString()} MAD</span>
+                    </div>
+                </div>
+
+                <div className="glass" style={{ padding: 8 }}>
+                    {isLoadingExpenses ? (
+                        <div className="emptyState">Chargement...</div>
+                    ) : filtered.length === 0 ? (
+                        <div className="emptyState">Aucune dépense enregistrée. Cliquez sur « Ajouter une dépense » pour commencer.</div>
+                    ) : (
+                        <div className="tableContainer">
+                            <table className="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th><th>Véhicule</th><th>Type</th><th>Description</th><th>Montant</th><th>Facture</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map(e => (
+                                        <tr key={e.id}>
+                                            <td>{new Date(e.date).toLocaleDateString()}</td>
+                                            <td className="agencyNameCol">{e.vehicle?.make} {e.vehicle?.model}</td>
+                                            <td>{expenseTypeLabel(e.type)}</td>
+                                            <td style={{ color: '#a99a83', fontSize: 13, maxWidth: 240 }}>{e.description || '—'}</td>
+                                            <td style={{ fontWeight: 700 }}>{Math.round(e.amount).toLocaleString()} MAD</td>
+                                            <td>{e.invoiceUrl
+                                                ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={14} /> Voir</a>
+                                                : <span style={{ color: '#837763' }}>—</span>}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         switch (view) {
             case 'dashboard': return renderDashboard();
@@ -1246,6 +1325,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             case 'settings': return renderSettings();
             case 'bookings': return renderBookings();
             case 'clients': return renderCustomers();
+            case 'expenses': return renderExpenses();
             default: return renderDashboard();
         }
     };
