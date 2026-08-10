@@ -118,6 +118,11 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
     const [expenseVehicleFilter, setExpenseVehicleFilter] = useState('');
     const [showExpenseModal, setShowExpenseModal] = useState(false);
+    const [expenseForm, setExpenseForm] = useState<{ vehicleId: string; type: string; amount: string; date: string; description: string }>({
+        vehicleId: '', type: 'MAINTENANCE', amount: '', date: new Date().toISOString().split('T')[0], description: ''
+    });
+    const [isSavingExpense, setIsSavingExpense] = useState(false);
+    const [expenseInvoiceFile, setExpenseInvoiceFile] = useState<File | null>(null);
     const [makes, setMakes] = useState<CarMake[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [loadingModels, setLoadingModels] = useState(false);
@@ -292,6 +297,58 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
     const expenseTypeLabel = (t: string) =>
         ({ REPAIR: 'Réparation', MAINTENANCE: 'Entretien', INSURANCE: 'Assurance', OTHER: 'Autre' } as Record<string, string>)[t] || t;
+
+    const submitExpense = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!expenseForm.vehicleId || expenseForm.amount === '') return;
+        setIsSavingExpense(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/expenses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    vehicleId: expenseForm.vehicleId,
+                    type: expenseForm.type,
+                    amount: parseFloat(expenseForm.amount),
+                    description: expenseForm.description || undefined,
+                    date: expenseForm.date ? new Date(expenseForm.date).toISOString() : undefined,
+                }),
+            });
+            if (res.ok) {
+                const created = await res.json();
+                if (expenseInvoiceFile) {
+                    const fd = new FormData();
+                    fd.append('invoice', expenseInvoiceFile);
+                    await fetch(`${getApiUrl()}/api/expenses/${created.id}/invoice`, {
+                        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+                    });
+                }
+                await fetchExpenses();
+                setShowExpenseModal(false);
+                setExpenseForm({ vehicleId: '', type: 'MAINTENANCE', amount: '', date: new Date().toISOString().split('T')[0], description: '' });
+                setExpenseInvoiceFile(null);
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.message || "Échec de l'enregistrement de la dépense");
+            }
+        } catch (err) {
+            console.error('Failed to save expense', err);
+        } finally {
+            setIsSavingExpense(false);
+        }
+    };
+
+    const deleteExpense = async (id: string) => {
+        if (!confirm('Supprimer cette dépense ?')) return;
+        try {
+            const res = await fetch(`${getApiUrl()}/api/expenses/${id}`, {
+                method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) setExpenses(prev => prev.filter(e => e.id !== id));
+        } catch (err) {
+            console.error('Failed to delete expense', err);
+        }
+    };
 
     const handleUpdateBookingStatus = async (id: string, status: string) => {
         try {
@@ -1293,7 +1350,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             <table className="dataTable">
                                 <thead>
                                     <tr>
-                                        <th>Date</th><th>Véhicule</th><th>Type</th><th>Description</th><th>Montant</th><th>Facture</th>
+                                        <th>Date</th><th>Véhicule</th><th>Type</th><th>Description</th><th>Montant</th><th>Facture</th><th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1307,6 +1364,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             <td>{e.invoiceUrl
                                                 ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={14} /> Voir</a>
                                                 : <span style={{ color: '#837763' }}>—</span>}</td>
+                                            <td>
+                                                <button onClick={() => deleteExpense(e.id)} className="iconBtn delete" title="Supprimer"><Trash2 size={16} /></button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1405,6 +1465,56 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 </div>
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {showExpenseModal && (
+                <div className="modalOverlay" onClick={() => setShowExpenseModal(false)}>
+                    <div className="modalContent glass" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
+                        <div className="modalHeader">
+                            <h2>Nouvelle dépense</h2>
+                            <button onClick={() => setShowExpenseModal(false)} className="closeBtn"><X size={24} /></button>
+                        </div>
+                        <form onSubmit={submitExpense} className="modalForm">
+                            <div className="inputGroup">
+                                <label className="label">Véhicule</label>
+                                <select className="input" required value={expenseForm.vehicleId} onChange={(e) => setExpenseForm({ ...expenseForm, vehicleId: e.target.value })}>
+                                    <option value="">Sélectionner un véhicule</option>
+                                    {vehicles.map(v => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
+                                </select>
+                            </div>
+                            <div className="formRow">
+                                <div className="inputGroup">
+                                    <label className="label">Type</label>
+                                    <select className="input" value={expenseForm.type} onChange={(e) => setExpenseForm({ ...expenseForm, type: e.target.value })}>
+                                        <option value="MAINTENANCE">Entretien</option>
+                                        <option value="REPAIR">Réparation</option>
+                                        <option value="INSURANCE">Assurance</option>
+                                        <option value="OTHER">Autre</option>
+                                    </select>
+                                </div>
+                                <div className="inputGroup">
+                                    <label className="label">Montant (MAD)</label>
+                                    <input type="number" min="0" step="0.01" className="input" required value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="inputGroup">
+                                <label className="label">Date</label>
+                                <input type="date" className="input" value={expenseForm.date} onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })} />
+                            </div>
+                            <div className="inputGroup">
+                                <label className="label">Description (optionnel)</label>
+                                <textarea rows={2} className="input" style={{ resize: 'vertical' }} value={expenseForm.description} onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })} />
+                            </div>
+                            <div className="inputGroup">
+                                <label className="label">Facture (optionnel — image ou PDF)</label>
+                                <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" className="input" onChange={(e) => setExpenseInvoiceFile(e.target.files?.[0] || null)} />
+                            </div>
+                            <button type="submit" className="submitBtn" disabled={isSavingExpense}>
+                                {isSavingExpense ? <Loader2 size={18} className="animate-spin" /> : 'Enregistrer la dépense'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
