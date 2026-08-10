@@ -296,7 +296,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     };
 
     const expenseTypeLabel = (t: string) =>
-        ({ REPAIR: 'Réparation', MAINTENANCE: 'Entretien', INSURANCE: 'Assurance', OTHER: 'Autre' } as Record<string, string>)[t] || t;
+        ({ REPAIR: 'Repair', MAINTENANCE: 'Maintenance', INSURANCE: 'Insurance', OTHER: 'Other' } as Record<string, string>)[t] || t;
 
     const submitExpense = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -329,7 +329,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 setExpenseInvoiceFile(null);
             } else {
                 const err = await res.json().catch(() => ({}));
-                alert(err.message || "Échec de l'enregistrement de la dépense");
+                alert(err.message || 'Failed to save expense');
             }
         } catch (err) {
             console.error('Failed to save expense', err);
@@ -339,7 +339,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     };
 
     const deleteExpense = async (id: string) => {
-        if (!confirm('Supprimer cette dépense ?')) return;
+        if (!confirm('Delete this expense?')) return;
         try {
             const res = await fetch(`${getApiUrl()}/api/expenses/${id}`, {
                 method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
@@ -1271,7 +1271,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                         <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#837763' }} />
                         <input
                             className="input"
-                            placeholder="Rechercher un client..."
+                            placeholder="Search clients..."
                             value={customerSearch}
                             onChange={(e) => setCustomerSearch(e.target.value)}
                             style={{ paddingLeft: 36, width: 280 }}
@@ -1283,17 +1283,17 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                     {isLoadingCustomers ? (
                         <div className="emptyState">Chargement des clients...</div>
                     ) : filtered.length === 0 ? (
-                        <div className="emptyState">Aucun client pour le moment. Les clients apparaissent après leur première réservation.</div>
+                        <div className="emptyState">No clients yet — they appear after their first booking.</div>
                     ) : (
                         <div className="tableContainer">
                             <table className="dataTable">
                                 <thead>
                                     <tr>
-                                        <th>Client</th>
+                                        <th>Customer</th>
                                         <th>Contact</th>
-                                        <th>Réservations</th>
-                                        <th>Total dépensé</th>
-                                        <th>Dernière location</th>
+                                        <th>Bookings</th>
+                                        <th>Total Spent</th>
+                                        <th>Last Rental</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1304,7 +1304,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                 <div style={{ fontSize: 13 }}>{c.email}</div>
                                                 <div style={{ fontSize: 12, color: '#a99a83' }}>{c.phone}</div>
                                             </td>
-                                            <td>{c.reservationsCount} <span style={{ color: '#a99a83', fontSize: 12 }}>({c.confirmedCount} confirmées)</span></td>
+                                            <td>{c.reservationsCount} <span style={{ color: '#a99a83', fontSize: 12 }}>({c.confirmedCount} confirmed)</span></td>
                                             <td style={{ fontWeight: 700, color: 'var(--accent)' }}>{Math.round(c.totalSpent).toLocaleString()} MAD</td>
                                             <td>{c.lastRentalDate ? new Date(c.lastRentalDate).toLocaleDateString() : '—'}</td>
                                         </tr>
@@ -1324,33 +1324,33 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         return (
             <div>
                 <header className="header" style={{ marginBottom: 24 }}>
-                    <h1>Dépenses</h1>
+                    <h1>Expenses</h1>
                     <button className="submitBtn" onClick={() => setShowExpenseModal(true)} style={{ width: 'auto', padding: '10px 18px', marginLeft: 'auto' }}>
-                        <Plus size={18} /> Ajouter une dépense
+                        <Plus size={18} /> Add Expense
                     </button>
                 </header>
 
                 <div style={{ display: 'flex', gap: 16, marginBottom: 20, alignItems: 'center' }}>
                     <select className="input" value={expenseVehicleFilter} onChange={(e) => setExpenseVehicleFilter(e.target.value)} style={{ width: 280 }}>
-                        <option value="">Tous les véhicules</option>
+                        <option value="">All Vehicles</option>
                         {vehicles.map(v => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
                     </select>
                     <div style={{ marginLeft: 'auto', fontSize: 14, color: '#a99a83' }}>
-                        Total : <span style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 18 }}>{Math.round(total).toLocaleString()} MAD</span>
+                        Total: <span style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 18 }}>{Math.round(total).toLocaleString()} MAD</span>
                     </div>
                 </div>
 
                 <div className="glass" style={{ padding: 8 }}>
                     {isLoadingExpenses ? (
-                        <div className="emptyState">Chargement...</div>
+                        <div className="emptyState">Loading...</div>
                     ) : filtered.length === 0 ? (
-                        <div className="emptyState">Aucune dépense enregistrée. Cliquez sur « Ajouter une dépense » pour commencer.</div>
+                        <div className="emptyState">No expenses recorded yet. Click &quot;Add Expense&quot; to get started.</div>
                     ) : (
                         <div className="tableContainer">
                             <table className="dataTable">
                                 <thead>
                                     <tr>
-                                        <th>Date</th><th>Véhicule</th><th>Type</th><th>Description</th><th>Montant</th><th>Facture</th><th></th>
+                                        <th>Date</th><th>Vehicle</th><th>Type</th><th>Description</th><th>Amount</th><th>Invoice</th><th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1362,10 +1362,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             <td style={{ color: '#a99a83', fontSize: 13, maxWidth: 240 }}>{e.description || '—'}</td>
                                             <td style={{ fontWeight: 700 }}>{Math.round(e.amount).toLocaleString()} MAD</td>
                                             <td>{e.invoiceUrl
-                                                ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={14} /> Voir</a>
+                                                ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={14} /> View</a>
                                                 : <span style={{ color: '#837763' }}>—</span>}</td>
                                             <td>
-                                                <button onClick={() => deleteExpense(e.id)} className="iconBtn delete" title="Supprimer"><Trash2 size={16} /></button>
+                                                <button onClick={() => deleteExpense(e.id)} className="iconBtn delete" title="Delete"><Trash2 size={16} /></button>
                                             </td>
                                         </tr>
                                     ))}
@@ -1413,9 +1413,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
                                     {[
-                                        { label: 'Réservations', value: selectedCustomer.stats.reservationsCount, accent: false },
-                                        { label: 'Confirmées', value: selectedCustomer.stats.confirmedCount, accent: false },
-                                        { label: 'Total dépensé', value: `${Math.round(selectedCustomer.stats.totalSpent).toLocaleString()} MAD`, accent: true },
+                                        { label: 'Bookings', value: selectedCustomer.stats.reservationsCount, accent: false },
+                                        { label: 'Confirmed', value: selectedCustomer.stats.confirmedCount, accent: false },
+                                        { label: 'Total Spent', value: `${Math.round(selectedCustomer.stats.totalSpent).toLocaleString()} MAD`, accent: true },
                                     ].map((s) => (
                                         <div key={s.label} style={{ padding: 14, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8 }}>
                                             <div style={{ fontSize: 11, textTransform: 'uppercase', color: '#a99a83', letterSpacing: '0.08em' }}>{s.label}</div>
@@ -1424,7 +1424,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                     ))}
                                 </div>
 
-                                <h3 style={{ fontSize: 15, marginBottom: 12 }}>Historique des locations</h3>
+                                <h3 style={{ fontSize: 15, marginBottom: 12 }}>Rental History</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 260, overflowY: 'auto' }}>
                                     {selectedCustomer.bookings.map((b: any) => (
                                         <div key={b.id} style={{ padding: '12px 14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1444,11 +1444,11 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                     ))}
                                 </div>
 
-                                <h3 style={{ fontSize: 15, margin: '22px 0 10px' }}>Notes internes</h3>
+                                <h3 style={{ fontSize: 15, margin: '22px 0 10px' }}>Internal Notes</h3>
                                 <textarea
                                     value={noteDraft}
                                     onChange={(e) => setNoteDraft(e.target.value)}
-                                    placeholder="Notes visibles uniquement par votre agence (préférences, incidents, remarques...)"
+                                    placeholder="Notes visible only to your agency (preferences, incidents, remarks...)"
                                     rows={3}
                                     className="input"
                                     style={{ resize: 'vertical', width: '100%' }}
@@ -1460,7 +1460,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         disabled={isSavingNote || noteDraft === (selectedCustomer.note || '')}
                                         style={{ width: 'auto', padding: '10px 22px' }}
                                     >
-                                        {isSavingNote ? <Loader2 size={16} className="animate-spin" /> : 'Enregistrer la note'}
+                                        {isSavingNote ? <Loader2 size={16} className="animate-spin" /> : 'Save Note'}
                                     </button>
                                 </div>
                             </>
@@ -1473,14 +1473,14 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 <div className="modalOverlay" onClick={() => setShowExpenseModal(false)}>
                     <div className="modalContent glass" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
                         <div className="modalHeader">
-                            <h2>Nouvelle dépense</h2>
+                            <h2>New Expense</h2>
                             <button onClick={() => setShowExpenseModal(false)} className="closeBtn"><X size={24} /></button>
                         </div>
                         <form onSubmit={submitExpense} className="modalForm">
                             <div className="inputGroup">
-                                <label className="label">Véhicule</label>
+                                <label className="label">Vehicle</label>
                                 <select className="input" required value={expenseForm.vehicleId} onChange={(e) => setExpenseForm({ ...expenseForm, vehicleId: e.target.value })}>
-                                    <option value="">Sélectionner un véhicule</option>
+                                    <option value="">Select a vehicle</option>
                                     {vehicles.map(v => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
                                 </select>
                             </div>
@@ -1488,14 +1488,14 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 <div className="inputGroup">
                                     <label className="label">Type</label>
                                     <select className="input" value={expenseForm.type} onChange={(e) => setExpenseForm({ ...expenseForm, type: e.target.value })}>
-                                        <option value="MAINTENANCE">Entretien</option>
-                                        <option value="REPAIR">Réparation</option>
-                                        <option value="INSURANCE">Assurance</option>
-                                        <option value="OTHER">Autre</option>
+                                        <option value="MAINTENANCE">Maintenance</option>
+                                        <option value="REPAIR">Repair</option>
+                                        <option value="INSURANCE">Insurance</option>
+                                        <option value="OTHER">Other</option>
                                     </select>
                                 </div>
                                 <div className="inputGroup">
-                                    <label className="label">Montant (MAD)</label>
+                                    <label className="label">Amount (MAD)</label>
                                     <input type="number" min="0" step="0.01" className="input" required value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
                                 </div>
                             </div>
@@ -1504,15 +1504,15 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 <input type="date" className="input" value={expenseForm.date} onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })} />
                             </div>
                             <div className="inputGroup">
-                                <label className="label">Description (optionnel)</label>
+                                <label className="label">Description (optional)</label>
                                 <textarea rows={2} className="input" style={{ resize: 'vertical' }} value={expenseForm.description} onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })} />
                             </div>
                             <div className="inputGroup">
-                                <label className="label">Facture (optionnel — image ou PDF)</label>
+                                <label className="label">Invoice (optional — image or PDF)</label>
                                 <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" className="input" onChange={(e) => setExpenseInvoiceFile(e.target.files?.[0] || null)} />
                             </div>
                             <button type="submit" className="submitBtn" disabled={isSavingExpense}>
-                                {isSavingExpense ? <Loader2 size={18} className="animate-spin" /> : 'Enregistrer la dépense'}
+                                {isSavingExpense ? <Loader2 size={18} className="animate-spin" /> : 'Save Expense'}
                             </button>
                         </form>
                     </div>

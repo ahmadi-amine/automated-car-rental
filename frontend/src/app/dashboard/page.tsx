@@ -196,7 +196,7 @@ export default function DashboardPage() {
                                 onClick={() => { setActiveTab('expenses'); router.push('/dashboard?view=expenses'); }}
                             >
                                 <Receipt size={20} />
-                                <span>Dépenses</span>
+                                <span>Expenses</span>
                             </div>
                         </>
                     )}
