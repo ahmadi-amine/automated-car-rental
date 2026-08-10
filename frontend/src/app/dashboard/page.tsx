@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Car, LogOut, LayoutDashboard, Users, Settings, Package, Calendar, Receipt } from 'lucide-react';
+import { Car, LogOut, LayoutDashboard, Users, Settings, Package, Calendar, Receipt, TrendingUp } from 'lucide-react';
 import AdminDashboard from '../../components/AdminDashboard';
 import AgenciesTable from '../../components/AgenciesTable';
 import AgencyDashboard from '../../components/AgencyDashboard';
@@ -42,7 +42,7 @@ export default function DashboardPage() {
         try {
             const params = new URLSearchParams(window.location.search);
             const v = params.get('view');
-            if (v && ['dashboard', 'fleet', 'bookings', 'clients', 'expenses', 'settings', 'agencies'].includes(v)) {
+            if (v && ['dashboard', 'fleet', 'bookings', 'clients', 'expenses', 'profitability', 'settings', 'agencies'].includes(v)) {
                 setActiveTab(v);
             }
         } catch (err) {
@@ -127,6 +127,7 @@ export default function DashboardPage() {
                 case 'bookings':
                 case 'clients':
                 case 'expenses':
+                case 'profitability':
                 case 'settings':
                     return <AgencyDashboard
                         token={token!}
@@ -197,6 +198,13 @@ export default function DashboardPage() {
                             >
                                 <Receipt size={20} />
                                 <span>Expenses</span>
+                            </div>
+                            <div
+                                className={`navItem ${activeTab === 'profitability' ? 'active' : ''}`}
+                                onClick={() => { setActiveTab('profitability'); router.push('/dashboard?view=profitability'); }}
+                            >
+                                <TrendingUp size={20} />
+                                <span>Profitability</span>
                             </div>
                         </>
                     )}

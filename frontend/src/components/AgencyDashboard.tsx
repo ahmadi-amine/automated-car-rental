@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { getApiUrl } from '@/utils/api';
-import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone, Receipt, FileText } from 'lucide-react';
+import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone, Receipt, FileText, TrendingUp } from 'lucide-react';
 import { carApi, CarMake, CarModel } from '../utils/carApi';
 
 interface AgencyDashboardProps {
     token: string;
-    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings' | 'clients' | 'expenses';
+    view?: 'dashboard' | 'fleet' | 'settings' | 'bookings' | 'clients' | 'expenses' | 'profitability';
 }
 
 // Searchable Select Component
@@ -123,6 +123,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     });
     const [isSavingExpense, setIsSavingExpense] = useState(false);
     const [expenseInvoiceFile, setExpenseInvoiceFile] = useState<File | null>(null);
+    const [profitability, setProfitability] = useState<any[]>([]);
+    const [isLoadingProfitability, setIsLoadingProfitability] = useState(false);
     const [makes, setMakes] = useState<CarMake[]>([]);
     const [models, setModels] = useState<CarModel[]>([]);
     const [loadingModels, setLoadingModels] = useState(false);
@@ -165,6 +167,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         fetchBookings();
         fetchCustomers();
         fetchExpenses();
+        fetchProfitability();
     }, []);
 
     const fetchVehicles = async () => {
@@ -292,6 +295,20 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             console.error('Failed to fetch expenses', err);
         } finally {
             setIsLoadingExpenses(false);
+        }
+    };
+
+    const fetchProfitability = async () => {
+        setIsLoadingProfitability(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/vehicles/profitability`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) setProfitability(await res.json());
+        } catch (err) {
+            console.error('Failed to fetch profitability', err);
+        } finally {
+            setIsLoadingProfitability(false);
         }
     };
 
@@ -1378,6 +1395,61 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         );
     };
 
+    const renderProfitability = () => {
+        const totRevenue = profitability.reduce((s, v) => s + v.revenue, 0);
+        const totExpenses = profitability.reduce((s, v) => s + v.expensesTotal, 0);
+        const netProfit = totRevenue - totExpenses;
+        return (
+            <div>
+                <header className="header" style={{ marginBottom: 24 }}><h1>Profitability</h1></header>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+                    {[
+                        { label: 'Total Revenue', value: totRevenue, color: 'var(--text-primary)' },
+                        { label: 'Total Expenses', value: totExpenses, color: 'var(--text-primary)' },
+                        { label: 'Net Profit', value: netProfit, color: netProfit >= 0 ? 'var(--success)' : 'var(--error)' },
+                    ].map(s => (
+                        <div key={s.label} className="statCard">
+                            <h3>{s.label}</h3>
+                            <div className="statValue" style={{ color: s.color }}>{Math.round(s.value).toLocaleString()} MAD</div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="glass" style={{ padding: 8 }}>
+                    {isLoadingProfitability ? (
+                        <div className="emptyState">Loading...</div>
+                    ) : profitability.length === 0 ? (
+                        <div className="emptyState">No vehicles yet.</div>
+                    ) : (
+                        <div className="tableContainer">
+                            <table className="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th><th>Rentals</th><th>Revenue</th><th>Maintenance</th><th>Repairs</th><th>Total Expenses</th><th>Profit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {profitability.map(v => (
+                                        <tr key={v.id}>
+                                            <td className="agencyNameCol">{v.make} {v.model} <span style={{ color: '#a99a83', fontWeight: 400 }}>({v.year})</span></td>
+                                            <td>{v.rentalsCount}</td>
+                                            <td>{Math.round(v.revenue).toLocaleString()} MAD</td>
+                                            <td style={{ color: '#a99a83' }}>{Math.round(v.maintenanceCost).toLocaleString()} MAD</td>
+                                            <td style={{ color: '#a99a83' }}>{Math.round(v.repairCost).toLocaleString()} MAD</td>
+                                            <td>{Math.round(v.expensesTotal).toLocaleString()} MAD</td>
+                                            <td style={{ fontWeight: 700, color: v.profit >= 0 ? 'var(--success)' : 'var(--error)' }}>{Math.round(v.profit).toLocaleString()} MAD</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         switch (view) {
             case 'dashboard': return renderDashboard();
@@ -1386,6 +1458,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             case 'bookings': return renderBookings();
             case 'clients': return renderCustomers();
             case 'expenses': return renderExpenses();
+            case 'profitability': return renderProfitability();
             default: return renderDashboard();
         }
     };
