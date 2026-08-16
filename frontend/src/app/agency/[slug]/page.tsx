@@ -11,6 +11,7 @@ export default function PublicAgencyPage() {
     const [agency, setAgency] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+    const [activeImg, setActiveImg] = useState<Record<string, string>>({});
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [bookingStep, setBookingStep] = useState(1); // 1: form, 2: success
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -219,11 +220,14 @@ export default function PublicAgencyPage() {
                     </h2>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                        {agency.vehicles?.map((v: any) => (
+                        {agency.vehicles?.map((v: any) => {
+                            const thumbs = [v.imageUrl, ...(v.images || [])].filter(Boolean);
+                            const cur = activeImg[v.id] || v.imageUrl;
+                            return (
                             <div key={v.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', transition: '0.3s' }}>
                                 <div style={{ height: '200px', background: '#241f18', position: 'relative' }}>
-                                    {v.imageUrl ? (
-                                        <img src={v.imageUrl} alt={v.make} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    {cur ? (
+                                        <img src={cur} alt={v.make} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
                                         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
                                             <Car size={48} />
@@ -240,10 +244,29 @@ export default function PublicAgencyPage() {
                                         </div>
                                     </div>
                                 </div>
+                                {thumbs.length > 1 && (
+                                    <div style={{ display: 'flex', gap: '6px', padding: '8px 12px 0', flexWrap: 'wrap' }}>
+                                        {thumbs.map((t: string) => (
+                                            <img
+                                                key={t}
+                                                src={t}
+                                                alt=""
+                                                onClick={() => setActiveImg(prev => ({ ...prev, [v.id]: t }))}
+                                                style={{
+                                                    width: '44px', height: '32px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer',
+                                                    border: cur === t ? `2px solid ${primaryColor}` : '2px solid transparent', opacity: cur === t ? 1 : 0.65
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                                 <div style={{ padding: '20px' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>{v.make} {v.model}</h3>
-                                    <p style={{ color: '#a99a83', fontSize: '14px', marginBottom: '16px' }}>{v.year} • Automatic • Diesel</p>
-                                    
+                                    <p style={{ color: '#a99a83', fontSize: '14px', marginBottom: v.description ? '8px' : '16px' }}>{v.year} • Automatic • Diesel</p>
+                                    {v.description && (
+                                        <p style={{ color: '#a99a83', fontSize: '13px', lineHeight: 1.5, marginBottom: '16px' }}>{v.description}</p>
+                                    )}
+
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(240,232,214,0.1)', paddingTop: '16px' }}>
                                         <div>
                                             <span style={{ fontSize: '20px', fontWeight: '800', color: primaryColor }}>{v.pricePerDay} MAD</span>
@@ -268,7 +291,8 @@ export default function PublicAgencyPage() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
