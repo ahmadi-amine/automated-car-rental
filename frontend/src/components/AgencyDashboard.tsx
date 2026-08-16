@@ -130,6 +130,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const [loadingModels, setLoadingModels] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<string[]>([]);
     const [isGettingAiPrice, setIsGettingAiPrice] = useState(false);
     const [aiPriceSuggestion, setAiPriceSuggestion] = useState<{ suggestedPrice: number; reasoning: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -143,6 +146,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         registrationNumber: '',
         pricePerDay: 50,
         category: 'SEDAN',
+        description: '',
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -560,6 +564,50 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         }
     };
 
+    const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+        setGalleryFiles(prev => [...prev, ...files]);
+        files.forEach(f => {
+            const reader = new FileReader();
+            reader.onloadend = () => setGalleryPreviews(prev => [...prev, reader.result as string]);
+            reader.readAsDataURL(f);
+        });
+        e.target.value = '';
+    };
+
+    const removeNewGalleryFile = (index: number) => {
+        setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+        setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const uploadGallery = async (vehicleId: string) => {
+        if (!galleryFiles.length) return;
+        const fd = new FormData();
+        galleryFiles.forEach(f => fd.append('images', f));
+        try {
+            await fetch(`${getApiUrl()}/api/vehicles/${vehicleId}/images`, {
+                method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+            });
+        } catch (err) {
+            console.error('Gallery upload failed', err);
+        }
+    };
+
+    const deleteExistingGalleryImage = async (url: string) => {
+        if (!editingId) return;
+        try {
+            const res = await fetch(`${getApiUrl()}/api/vehicles/${editingId}/images`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ url }),
+            });
+            if (res.ok) setExistingImages(prev => prev.filter(u => u !== url));
+        } catch (err) {
+            console.error('Failed to remove image', err);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -593,12 +641,18 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 if (selectedFile) {
                     await uploadImage(vehicleId);
                 }
+                if (galleryFiles.length) {
+                    await uploadGallery(vehicleId);
+                }
 
                 setShowAddModal(false);
                 setIsEditing(false);
                 setEditingId(null);
                 setSelectedFile(null);
                 setImagePreview(null);
+                setGalleryFiles([]);
+                setGalleryPreviews([]);
+                setExistingImages([]);
                 fetchVehicles();
                 setFormData(initialFormState);
             } else {
@@ -622,8 +676,12 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             registrationNumber: v.registrationNumber,
             pricePerDay: v.pricePerDay,
             category: v.category,
+            description: v.description || '',
         });
         setImagePreview(v.imageUrl || null);
+        setExistingImages(v.images || []);
+        setGalleryFiles([]);
+        setGalleryPreviews([]);
 
         // Initialize models for the editing car's make
         setLoadingModels(true);
@@ -655,6 +713,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         setEditingId(null);
         setSelectedFile(null);
         setImagePreview(null);
+        setGalleryFiles([]);
+        setGalleryPreviews([]);
+        setExistingImages([]);
         setAiPriceSuggestion(null);
         setFormData(initialFormState);
     };
@@ -1778,6 +1839,47 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             </p>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+
+                            <div className="inputGroup">
+                                <label className="label">Description</label>
+                                <textarea
+                                    className="input"
+                                    rows={3}
+                                    style={{ resize: 'vertical' }}
+                                    placeholder="Describe the vehicle (condition, options, notes for customers...)"
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="inputGroup">
+                                <label className="label">Photo Gallery</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                                    {existingImages.map((url) => (
+                                        <div key={url} style={{ position: 'relative', width: 92, height: 66, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                                            <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <button type="button" onClick={() => deleteExistingGalleryImage(url)} title="Remove"
+                                                style={{ position: 'absolute', top: 3, right: 3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(10,8,6,0.7)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}>
+                                                <X size={13} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {galleryPreviews.map((src, i) => (
+                                        <div key={i} style={{ position: 'relative', width: 92, height: 66, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--accent)' }}>
+                                            <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <button type="button" onClick={() => removeNewGalleryFile(i)} title="Remove"
+                                                style={{ position: 'absolute', top: 3, right: 3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(10,8,6,0.7)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}>
+                                                <X size={13} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <label style={{ width: 92, height: 66, borderRadius: 8, border: '2px dashed var(--border-strong)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)', gap: 2 }}>
+                                        <Plus size={18} />
+                                        <span style={{ fontSize: 10 }}>Add</span>
+                                        <input type="file" accept="image/*" multiple onChange={handleGalleryChange} style={{ display: 'none' }} />
+                                    </label>
                                 </div>
                             </div>
 
