@@ -32,4 +32,8 @@ export class CreateVehicleDto {
     @IsString()
     @IsOptional()
     imageUrl?: string;
+
+    @IsString()
+    @IsOptional()
+    description?: string;
 }

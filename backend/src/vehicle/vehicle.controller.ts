@@ -10,12 +10,13 @@ import {
     Req,
     UseInterceptors,
     UploadedFile,
+    UploadedFiles,
     ParseFilePipe,
     MaxFileSizeValidator,
     FileTypeValidator,
     Query,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { VehicleService } from './vehicle.service';
@@ -99,6 +100,37 @@ export class VehicleController {
 
         const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
         return this.vehicleService.updateImageUrl(id, req.user.userId, imageUrl);
+    }
+
+    @Post(':id/images')
+    @Roles(Role.AGENCY)
+    @UseInterceptors(
+        FilesInterceptor('images', 10, {
+            storage: diskStorage({
+                destination: './uploads',
+                filename: (req, file, callback) => {
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                    callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
+                },
+            }),
+        }),
+    )
+    uploadGallery(
+        @Req() req: any,
+        @Param('id') id: string,
+        @UploadedFiles() files: Express.Multer.File[],
+    ) {
+        const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+        const urls = (files || [])
+            .filter((f) => allowed.includes(extname(f.originalname).toLowerCase()))
+            .map((f) => `http://localhost:3001/uploads/${f.filename}`);
+        return this.vehicleService.addGalleryImages(id, req.user.userId, urls);
+    }
+
+    @Delete(':id/images')
+    @Roles(Role.AGENCY)
+    removeGalleryImage(@Req() req: any, @Param('id') id: string, @Body('url') url: string) {
+        return this.vehicleService.removeGalleryImage(id, req.user.userId, url);
     }
 
     @Delete(':id')

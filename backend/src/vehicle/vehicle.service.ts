@@ -171,6 +171,24 @@ export class VehicleService {
         });
     }
 
+    async addGalleryImages(id: string, userId: string, urls: string[]) {
+        await this.findOne(id, userId);
+        return this.prisma.vehicle.update({
+            where: { id },
+            data: { images: { push: urls } },
+        });
+    }
+
+    async removeGalleryImage(id: string, userId: string, url: string) {
+        const vehicle = await this.findOne(id, userId);
+        const remaining = (vehicle.images || []).filter((u: string) => u !== url);
+        this.deleteOldImage(url);
+        return this.prisma.vehicle.update({
+            where: { id },
+            data: { images: remaining },
+        });
+    }
+
     async remove(id: string, userId: string) {
         const vehicle = await this.findOne(id, userId);
 
