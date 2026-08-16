@@ -172,10 +172,10 @@ export class VehicleService {
     }
 
     async addGalleryImages(id: string, userId: string, urls: string[]) {
-        await this.findOne(id, userId);
+        const vehicle = await this.findOne(id, userId);
         return this.prisma.vehicle.update({
             where: { id },
-            data: { images: { push: urls } },
+            data: { images: { set: [...(vehicle.images || []), ...urls] } },
         });
     }
 
@@ -185,7 +185,7 @@ export class VehicleService {
         this.deleteOldImage(url);
         return this.prisma.vehicle.update({
             where: { id },
-            data: { images: remaining },
+            data: { images: { set: remaining } },
         });
     }
 
