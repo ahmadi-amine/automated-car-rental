@@ -267,7 +267,7 @@ export class AiService {
        - If dates were ALREADY provided (e.g. via 'show_available_fleet'), do NOT ask for them again.
        - **WARNING**: NEVER assume or invent dates.
     3. **AVAILABILITY CHECK**: When a specific car is chosen and dates are known but availability was NOT already established via 'show_available_fleet', call 'check_availability'.
-    4. **QUOTE / DEVIS (ON REQUEST ONLY)**: If — once a car and dates are known — the user asks for a quote, devis, estimate, or price breakdown, call 'prepare_quote' with the vehicleId and dates. This shows the user a button to view/print the quote. Do NOT call 'prepare_quote' unless the user explicitly asks. After a quote, simply continue the normal flow.
+    4. **QUOTE / DEVIS (ON REQUEST ONLY)**: If — once a car and dates are known — the user asks for a quote, devis, estimate, or price breakdown, call 'prepare_quote' with the vehicleId and dates. This shows the user a button to view/print the quote. Do NOT call 'prepare_quote' unless the user explicitly asks. If the user's message explicitly asks for a quote/devis/estimate AND names a specific car AND dates, call 'prepare_quote' directly (do NOT call 'show_available_fleet' in that case). After a quote, simply continue the normal flow.
     5. **USER DETAILS**: To place a booking, ask for First Name, then Last Name, then Email, then Phone (ONE-BY-ONE).
     6. **SUMMARY**: Call 'prepare_booking' only after Step 5 is complete and all required fields are gathered.
 
