@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Car, Calendar, DollarSign, Info, MapPin, Phone, Mail, ShieldCheck, Clock, X, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { getApiUrl } from '@/utils/api';
 
@@ -166,7 +166,7 @@ export default function PublicAgencyPage() {
                     {agency.logoUrl ? (
                         <img src={agency.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                        <Car size={48} style={{ color: primaryColor }} />
+                        <span style={{ fontSize: '46px', fontWeight: 700, color: primaryColor }}>{agency.name?.charAt(0)?.toUpperCase()}</span>
                     )}
                 </div>
             </div>
@@ -178,11 +178,9 @@ export default function PublicAgencyPage() {
                 
                 <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a99a83' }}>
-                        <ShieldCheck size={18} style={{ color: primaryColor }} />
                         <span>Min. Age: {agency.minAge}+</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a99a83' }}>
-                        <DollarSign size={18} style={{ color: primaryColor }} />
                         <span>Deposit: {agency.depositAmount} MAD</span>
                     </div>
                 </div>
@@ -231,8 +229,8 @@ export default function PublicAgencyPage() {
                                     {cur ? (
                                         <img src={cur} alt={v.make} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
-                                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
-                                            <Car size={48} />
+                                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.4, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                                            No photo
                                         </div>
                                     )}
                                     <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
@@ -329,7 +327,7 @@ export default function PublicAgencyPage() {
                         <div style={{ color: '#a99a83', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {agency.rentalConditions ? agency.rentalConditions.split('\n').map((condition: string, i: number) => (
                                 <div key={i} style={{ display: 'flex', gap: '10px' }}>
-                                    <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: primaryColor }} />
+                                    <span style={{ flexShrink: 0, marginTop: '1px', color: primaryColor }}>•</span>
                                     <span>{condition}</span>
                                 </div>
                             )) : "Standard rental terms apply."}
@@ -338,19 +336,10 @@ export default function PublicAgencyPage() {
 
                     <div className="glass" style={{ padding: '24px', borderRadius: '16px' }}>
                         <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Contact Details</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: '#a99a83' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <MapPin size={18} />
-                                <span>{agency.address || 'Address not listed'}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Phone size={18} />
-                                <span>{agency.phone || 'Phone not listed'}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <Mail size={18} />
-                                <span>{agency.publicEmail || agency.user?.email || 'Email not listed'}</span>
-                            </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: '#a99a83', fontSize: '14px' }}>
+                            <div>{agency.address || 'Address not listed'}</div>
+                            <div>{agency.phone || 'Phone not listed'}</div>
+                            <div>{agency.publicEmail || agency.user?.email || 'Email not listed'}</div>
                         </div>
                     </div>
                 </div>
@@ -472,7 +461,7 @@ export default function PublicAgencyPage() {
                             </>
                         ) : (
                             <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                                <CheckCircle2 size={80} style={{ color: '#10b981', marginBottom: '24px' }} />
+                                <div style={{ fontSize: '56px', color: '#6fa07a', marginBottom: '16px' }}>✓</div>
                                 <h2 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '12px' }}>Request Received!</h2>
                                 <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 32px' }}>
                                     Your booking request for the <strong>{selectedVehicle?.make} {selectedVehicle?.model}</strong> has been sent to the agency. They will contact you shortly to confirm.
