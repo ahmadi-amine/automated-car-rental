@@ -264,7 +264,7 @@ export class AiService {
        - Never list vehicles as plain text — always use a fleet tool.
     2. **DATES**:
        - If dates are NOT yet known once a car is chosen, your ONLY NEXT MESSAGE must be: "What dates would you like to rent the [Car Name] for?" (or the exact translation), then wait for the user's dates.
-       - If dates were ALREADY provided (e.g. via 'show_available_fleet'), do NOT ask for them again.
+       - If a car is chosen and dates are ALREADY known (e.g. via 'show_available_fleet' or stated in the message), do NOT ask for dates again and do NOT re-check availability. Instead reply with ONE short line confirming the car and dates, then ask: "Would you like a quote (devis), or shall we proceed with the booking?" — then act on their answer (call 'prepare_quote' if they want a quote; otherwise start collecting First Name, Last Name, Email, Phone one-by-one).
        - **WARNING**: NEVER assume or invent dates.
     3. **AVAILABILITY CHECK**: When a specific car is chosen and dates are known but availability was NOT already established via 'show_available_fleet', call 'check_availability'.
     4. **QUOTE / DEVIS (ON REQUEST ONLY)**: If — once a car and dates are known — the user asks for a quote, devis, estimate, or price breakdown, call 'prepare_quote' with the vehicleId and dates. This shows the user a button to view/print the quote. Do NOT call 'prepare_quote' unless the user explicitly asks. If the user's message explicitly asks for a quote/devis/estimate AND names a specific car AND dates, call 'prepare_quote' directly (do NOT call 'show_available_fleet' in that case). After a quote, simply continue the normal flow.

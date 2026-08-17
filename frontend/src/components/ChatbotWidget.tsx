@@ -74,6 +74,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, on
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [knownDates, setKnownDates] = useState<{ start: string; end: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -149,6 +150,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, on
           fleetData: data.fleetData,
           quoteData: data.quoteData
         }]);
+        if (data.quoteDates) setKnownDates(data.quoteDates);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I'm having trouble connecting right now. Please try again later." }]);
       }
@@ -244,6 +246,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, on
       setMessages([
         { role: 'assistant', content: `Hello! I'm the AI assistant for ${agencyName}. How can I help you today?` }
       ]);
+      setKnownDates(null);
       localStorage.removeItem(storageKey);
     }
   };
@@ -299,7 +302,10 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, on
   };
 
   const handleSelectCar = (car: any) => {
-    const message = `I'd like to rent the ${car.make} ${car.model}`;
+    // If dates were already provided (dates-first flow), include them so the agent
+    // doesn't ask for them again.
+    const dateSuffix = knownDates ? ` from ${knownDates.start} to ${knownDates.end}` : '';
+    const message = `I'd like to rent the ${car.make} ${car.model}${dateSuffix}`;
     // Directly trigger send flow
     handleAutoSend(message);
   };
@@ -332,6 +338,7 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, on
           fleetData: data.fleetData,
           quoteData: data.quoteData
         }]);
+        if (data.quoteDates) setKnownDates(data.quoteDates);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I'm having trouble connecting right now. Please try again later." }]);
       }
