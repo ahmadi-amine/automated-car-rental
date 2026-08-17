@@ -733,6 +733,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             return b.status === 'CONFIRMED' && today >= start && today <= end;
         }).length;
 
+        // Loyal / repeat customers (2+ bookings) and top spenders — from CRM data.
+        const loyalCustomers = customers.filter(c => c.reservationsCount >= 2).length;
+        const topClients = [...customers].sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 3);
+
         return (
         <>
             <header className="header">
@@ -755,6 +759,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 <div className="statCard glass">
                     <h3>Total Cars</h3>
                     <p className="statValue">{vehicles.length}</p>
+                </div>
+                <div className="statCard glass">
+                    <h3>Loyal Customers</h3>
+                    <p className="statValue">{loyalCustomers}</p>
                 </div>
             </section>
 
@@ -792,6 +800,26 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                         </table>
                     </div>
                 )}
+        </section>
+
+        <section className="recentActivity glass" style={{ marginTop: '24px' }}>
+            <h2>Top Clients</h2>
+            {topClients.length === 0 ? (
+                <div className="emptyState"><p>No clients yet.</p></div>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {topClients.map((c, i) => (
+                        <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 4px', borderBottom: i < topClients.length - 1 ? '1px solid rgba(240,232,214,0.05)' : 'none' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', color: 'var(--accent-contrast)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px', flexShrink: 0 }}>{i + 1}</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 600 }}>{c.firstName} {c.lastName}</div>
+                                <div style={{ fontSize: '12px', color: '#a99a83' }}>{c.reservationsCount} bookings · {c.confirmedCount} confirmed</div>
+                            </div>
+                            <div style={{ fontWeight: 700, color: 'var(--accent)' }}>{Math.round(c.totalSpent).toLocaleString()} MAD</div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </section>
         </>
         );
