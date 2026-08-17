@@ -14,6 +14,7 @@ import {
     ParseFilePipe,
     MaxFileSizeValidator,
     FileTypeValidator,
+    BadRequestException,
     Query,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -90,12 +91,10 @@ export class VehicleController {
         )
         file: Express.Multer.File,
     ) {
-        // Manual check for image types if validator is being finicky
-        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-        const extension = extname(file.originalname).toLowerCase();
-
-        if (!allowedExtensions.includes(extension)) {
-            throw new Error('Invalid file type. Only JPG, PNG and WebP are allowed.');
+        // Accept any browser-renderable image (jpg, jpeg, jfif, png, webp, gif, avif, bmp...).
+        // SVG is excluded because it can carry scripts.
+        if (!file.mimetype.startsWith('image/') || file.mimetype === 'image/svg+xml') {
+            throw new BadRequestException('Invalid file type. Please upload an image (JPG, PNG, WebP, GIF, AVIF, BMP...).');
         }
 
         const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
@@ -120,9 +119,8 @@ export class VehicleController {
         @Param('id') id: string,
         @UploadedFiles() files: Express.Multer.File[],
     ) {
-        const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
         const urls = (files || [])
-            .filter((f) => allowed.includes(extname(f.originalname).toLowerCase()))
+            .filter((f) => f.mimetype.startsWith('image/') && f.mimetype !== 'image/svg+xml')
             .map((f) => `http://localhost:3001/uploads/${f.filename}`);
         return this.vehicleService.addGalleryImages(id, req.user.userId, urls);
     }
