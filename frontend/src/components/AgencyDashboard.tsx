@@ -815,8 +815,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                     vehicles.map((v) => (
                         <div key={v.id} className="carCard glass">
                             <div className="carImageContainer">
-                                {v.imageUrl ? (
-                                    <img src={v.imageUrl} alt={`${v.make} ${v.model}`} className="carImage" />
+                                {(v.imageUrl || v.images?.[0]) ? (
+                                    <img src={v.imageUrl || v.images[0]} alt={`${v.make} ${v.model}`} className="carImage" />
                                 ) : (
                                     <div className="carPlaceholder">
                                         <Car size={48} />

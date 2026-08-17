@@ -222,7 +222,7 @@ export default function PublicAgencyPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                         {agency.vehicles?.map((v: any) => {
                             const thumbs = [v.imageUrl, ...(v.images || [])].filter(Boolean);
-                            const cur = activeImg[v.id] || v.imageUrl;
+                            const cur = activeImg[v.id] || v.imageUrl || (v.images && v.images[0]);
                             return (
                             <div key={v.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', transition: '0.3s' }}>
                                 <div style={{ height: '200px', background: '#241f18', position: 'relative' }}>
