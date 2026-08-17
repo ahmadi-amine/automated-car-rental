@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 import { BookingStatus } from '@prisma/client';
 
 @Injectable()
@@ -102,6 +103,59 @@ export class BookingService {
             where: { id: bookingId },
             data: { status },
             include: { vehicle: true }
+        });
+    }
+
+    async update(bookingId: string, userId: string, dto: UpdateBookingDto) {
+        const booking = await this.prisma.booking.findUnique({
+            where: { id: bookingId },
+            include: { agency: true }
+        });
+
+        if (!booking) {
+            throw new NotFoundException('Booking not found');
+        }
+        if (booking.agency.userId !== userId) {
+            throw new BadRequestException('You do not have permission to manage this booking');
+        }
+
+        const vehicleId = dto.vehicleId || booking.vehicleId;
+        const start = dto.startDate ? new Date(dto.startDate) : booking.startDate;
+        const end = dto.endDate ? new Date(dto.endDate) : booking.endDate;
+
+        if (end <= start) {
+            throw new BadRequestException('End date must be after start date');
+        }
+
+        const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } });
+        if (!vehicle || vehicle.agencyId !== booking.agencyId) {
+            throw new BadRequestException('Vehicle does not belong to this agency');
+        }
+
+        // Availability check excluding the booking being edited.
+        const overlap = await this.prisma.booking.findFirst({
+            where: {
+                vehicleId,
+                id: { not: bookingId },
+                status: { in: [BookingStatus.CONFIRMED, BookingStatus.PENDING] },
+                AND: [
+                    { startDate: { lt: end } },
+                    { endDate: { gt: start } }
+                ]
+            }
+        });
+        if (overlap) {
+            throw new BadRequestException('Vehicle is not available for these dates');
+        }
+
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+        const totalPrice = diffDays * vehicle.pricePerDay;
+
+        return this.prisma.booking.update({
+            where: { id: bookingId },
+            data: { startDate: start, endDate: end, vehicleId, totalPrice },
+            include: { customer: true, vehicle: true }
         });
     }
 
