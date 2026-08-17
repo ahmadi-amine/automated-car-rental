@@ -9,6 +9,7 @@ interface Message {
   content: string;
   bookingData?: any;
   fleetData?: any[];
+  quoteData?: any;
   isConfirmed?: boolean;
 }
 
@@ -16,6 +17,7 @@ interface ChatbotWidgetProps {
   agencySlug: string;
   primaryColor: string;
   agencyName: string;
+  onRequestQuote?: (vehicle: any, dates: { start: string; end: string }) => void;
 }
 
 // Render minimal inline formatting: **bold** segments become <strong>.
@@ -67,7 +69,7 @@ function renderRichText(text: string): React.ReactNode {
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{blocks}</div>;
 }
 
-export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: ChatbotWidgetProps) {
+export default function ChatbotWidget({ agencySlug, primaryColor, agencyName, onRequestQuote }: ChatbotWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState('');
@@ -144,7 +146,8 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
           role: 'assistant', 
           content: data.answer,
           bookingData: data.bookingData,
-          fleetData: data.fleetData
+          fleetData: data.fleetData,
+          quoteData: data.quoteData
         }]);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I'm having trouble connecting right now. Please try again later." }]);
@@ -326,7 +329,8 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
           role: 'assistant', 
           content: data.answer,
           bookingData: data.bookingData,
-          fleetData: data.fleetData
+          fleetData: data.fleetData,
+          quoteData: data.quoteData
         }]);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I'm having trouble connecting right now. Please try again later." }]);
@@ -531,6 +535,35 @@ export default function ChatbotWidget({ agencySlug, primaryColor, agencyName }: 
                         {isLoading ? <Loader2 size={16} className="animate-spin" style={{ margin: '0 auto' }} /> : 'Confirm Booking'}
                       </button>
                     )}
+                  </div>
+                )}
+
+                {/* Quote (Devis) button */}
+                {msg.quoteData && (
+                  <div style={{ marginLeft: '42px', width: 'calc(100% - 42px)' }}>
+                    <button
+                      onClick={() => onRequestQuote && onRequestQuote(msg.quoteData.vehicleDetails, { start: msg.quoteData.startDate, end: msg.quoteData.endDate })}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: 'transparent',
+                        color: primaryColor,
+                        border: `1px solid ${primaryColor}`,
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <span>View Quote (Devis)</span>
+                      <span style={{ fontSize: '11px', opacity: 0.75, fontWeight: 500 }}>
+                        {msg.quoteData.vehicleDetails?.make} {msg.quoteData.vehicleDetails?.model} · {msg.quoteData.days} day(s) · {msg.quoteData.total} MAD
+                      </span>
+                    </button>
                   </div>
                 )}
 

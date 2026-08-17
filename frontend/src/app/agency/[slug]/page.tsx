@@ -135,9 +135,9 @@ export default function PublicAgencyPage() {
         return diff > 0 ? diff : (s === e ? 1 : 0);
     };
 
-    const openQuote = (v: any) => {
+    const openQuote = (v: any, dates?: { start: string; end: string }) => {
         setQuoteVehicle(v);
-        setQuoteDates({ start: filterDates.start, end: filterDates.end });
+        setQuoteDates(dates ? { start: dates.start, end: dates.end } : { start: filterDates.start, end: filterDates.end });
         const now = new Date();
         const num = `Q-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
         setQuoteMeta({ number: num, date: now.toLocaleDateString() });
@@ -660,6 +660,7 @@ export default function PublicAgencyPage() {
                 agencySlug={slug as string}
                 primaryColor={primaryColor}
                 agencyName={agency.name}
+                onRequestQuote={(v, dates) => openQuote(v, dates)}
             />
         </div>
     );
