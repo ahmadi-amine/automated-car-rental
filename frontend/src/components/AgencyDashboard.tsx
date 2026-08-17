@@ -138,6 +138,9 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const [editingBooking, setEditingBooking] = useState(false);
+    const [bookingEdit, setBookingEdit] = useState<{ startDate: string; endDate: string; vehicleId: string }>({ startDate: '', endDate: '', vehicleId: '' });
+    const [isSavingBooking, setIsSavingBooking] = useState(false);
 
     const initialFormState = {
         make: '',
@@ -392,6 +395,44 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
         } catch (err) {
             console.error('Error updating status', err);
         }
+    };
+
+    const startEditBooking = () => {
+        setBookingEdit({
+            startDate: new Date(selectedBooking.startDate).toISOString().split('T')[0],
+            endDate: new Date(selectedBooking.endDate).toISOString().split('T')[0],
+            vehicleId: selectedBooking.vehicle.id,
+        });
+        setEditingBooking(true);
+    };
+
+    const handleUpdateBooking = async () => {
+        setIsSavingBooking(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/bookings/${selectedBooking.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify(bookingEdit),
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setSelectedBooking((prev: any) => ({ ...prev, ...updated }));
+                setEditingBooking(false);
+                fetchBookings();
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.message || 'Failed to update booking');
+            }
+        } catch (err) {
+            console.error('Error updating booking', err);
+        } finally {
+            setIsSavingBooking(false);
+        }
+    };
+
+    const closeBookingModal = () => {
+        setSelectedBooking(null);
+        setEditingBooking(false);
     };
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -1258,11 +1299,11 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
             {/* Booking Detail Modal */}
             {selectedBooking && (
-                <div className="modalOverlay" onClick={() => setSelectedBooking(null)}>
+                <div className="modalOverlay" onClick={closeBookingModal}>
                     <div className="modalContent glass" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
                         <div className="modalHeader" style={{ marginBottom: '24px' }}>
-                            <h2>Booking Details</h2>
-                            <button onClick={() => setSelectedBooking(null)} className="closeBtn"><X size={24} /></button>
+                            <h2>{editingBooking ? 'Edit Booking' : 'Booking Details'}</h2>
+                            <button onClick={closeBookingModal} className="closeBtn"><X size={24} /></button>
                         </div>
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1284,12 +1325,20 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
                             <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
                                 <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '16px' }}>Vehicle</h3>
-                                <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
-                                    {selectedBooking.vehicle.make} {selectedBooking.vehicle.model} ({selectedBooking.vehicle.year})
-                                </p>
-                                <p style={{ margin: '4px 0 0 0', color: '#837763', fontSize: '12px' }}>
-                                    Reg: {selectedBooking.vehicle.registrationNumber}
-                                </p>
+                                {editingBooking ? (
+                                    <select className="input" value={bookingEdit.vehicleId} onChange={(e) => setBookingEdit({ ...bookingEdit, vehicleId: e.target.value })}>
+                                        {vehicles.map(v => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
+                                    </select>
+                                ) : (
+                                    <>
+                                        <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
+                                            {selectedBooking.vehicle.make} {selectedBooking.vehicle.model} ({selectedBooking.vehicle.year})
+                                        </p>
+                                        <p style={{ margin: '4px 0 0 0', color: '#837763', fontSize: '12px' }}>
+                                            Reg: {selectedBooking.vehicle.registrationNumber}
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
@@ -1307,17 +1356,22 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
 
                             <div style={{ background: 'rgba(240,232,214,0.03)', borderRadius: '16px', padding: '16px' }}>
                                 <h3 style={{ margin: '0 0 12px 0', color: 'white', fontSize: '16px' }}>Rental Period</h3>
-                                <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
-                                    {new Date(selectedBooking.startDate).toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'long', 
-                                        day: 'numeric' 
-                                    })} → {new Date(selectedBooking.endDate).toLocaleDateString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'long', 
-                                        day: 'numeric' 
-                                    })}
-                                </p>
+                                {editingBooking ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        <div className="inputGroup">
+                                            <label className="label">Start</label>
+                                            <input type="date" className="input" value={bookingEdit.startDate} onChange={(e) => setBookingEdit({ ...bookingEdit, startDate: e.target.value })} />
+                                        </div>
+                                        <div className="inputGroup">
+                                            <label className="label">End</label>
+                                            <input type="date" className="input" value={bookingEdit.endDate} min={bookingEdit.startDate} onChange={(e) => setBookingEdit({ ...bookingEdit, endDate: e.target.value })} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p style={{ margin: '0', color: '#a99a83', fontSize: '14px' }}>
+                                        {new Date(selectedBooking.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} → {new Date(selectedBooking.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </p>
+                                )}
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(240,232,214,0.03)', borderRadius: '16px' }}>
@@ -1326,30 +1380,47 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                             </div>
 
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                {selectedBooking.status === 'PENDING' && (
-                                    <button 
-                                        onClick={() => {
-                                            handleUpdateBookingStatus(selectedBooking.id, 'CONFIRMED');
-                                            setSelectedBooking(null);
-                                        }}
-                                        className="approveBtn" style={{ flex: 1, padding: '12px', fontSize: '14px' }}
-                                    >
-                                        Confirm Booking
-                                    </button>
-                                )}
-
-                                {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED') && (
-                                    <button 
-                                        onClick={() => {
-                                            if (confirm('Are you sure you want to cancel this booking?')) {
-                                                handleUpdateBookingStatus(selectedBooking.id, 'CANCELLED');
-                                                setSelectedBooking(null);
-                                            }
-                                        }}
-                                        style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(198,90,72,0.16)', border: '1px solid #c65a48', color: '#c65a48', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
-                                    >
-                                        Cancel Booking
-                                    </button>
+                                {editingBooking ? (
+                                    <>
+                                        <button onClick={handleUpdateBooking} disabled={isSavingBooking} className="approveBtn" style={{ flex: 1, padding: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                            {isSavingBooking ? <Loader2 size={16} className="animate-spin" /> : 'Save Changes'}
+                                        </button>
+                                        <button onClick={() => setEditingBooking(false)} style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(240,232,214,0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 }}>
+                                            Cancel
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {selectedBooking.status === 'PENDING' && (
+                                            <button
+                                                onClick={() => { handleUpdateBookingStatus(selectedBooking.id, 'CONFIRMED'); closeBookingModal(); }}
+                                                className="approveBtn" style={{ flex: 1, padding: '12px', fontSize: '14px' }}
+                                            >
+                                                Confirm
+                                            </button>
+                                        )}
+                                        {selectedBooking.status !== 'CANCELLED' && (
+                                            <button
+                                                onClick={startEditBooking}
+                                                style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(240,232,214,0.05)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                                            >
+                                                <Edit2 size={15} /> Edit
+                                            </button>
+                                        )}
+                                        {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED') && (
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm('Are you sure you want to cancel this booking?')) {
+                                                        handleUpdateBookingStatus(selectedBooking.id, 'CANCELLED');
+                                                        closeBookingModal();
+                                                    }
+                                                }}
+                                                style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(198,90,72,0.16)', border: '1px solid #c65a48', color: '#c65a48', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
+                                            >
+                                                Cancel Booking
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
