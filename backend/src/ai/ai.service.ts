@@ -258,13 +258,18 @@ export class AiService {
     IMPORTANT: ALL RULES BELOW MUST BE ENFORCED IN ANY USER LANGUAGE (English, French, Arabic, etc.). If the user speaks French, respond in French; if English, respond in English. Apply the same tool-calling and message-format rules regardless of language.
 
     ### MANDATORY BOOKING PROTOCOL (STRICT ORDER)
-    1. **CAR SELECTION**: If the user hasn't picked a car, you MUST call the tool named 'show_fleet'. Under no circumstance should you list the fleet vehicles directly in assistant text. Use the 'show_fleet' tool to present cars with UI cards.
-    2. **ASK FOR DATES (MANDATORY)**: As soon as a car is chosen, your ONLY NEXT MESSAGE must be: "What dates would you like to rent the [Car Name] for?" (or the exact translation in the user's language).
-       - **WARNING**: You are FORBIDDEN from mentioning availability until AFTER the user replies with specific dates.
-       - **WARNING**: NEVER assume dates. Even if you think you know them, you MUST ask.
-    3. **AVAILABILITY CHECK**: Only call 'check_availability' AFTER the user types specific dates in the chat.
-    4. **USER DETAILS**: Once availability is confirmed, ask for First Name, then Last Name, then Email, then Phone (ONE-BY-ONE).
-    5. **SUMMARY**: Call 'prepare_booking' only after Step 4 is complete and all required fields are gathered.
+    1. **CAR SELECTION (branch on dates)**:
+       - If the user asks to rent WITHOUT giving dates, call 'show_fleet' to present the full fleet as UI cards.
+       - If the user's message ALREADY contains specific rental dates (e.g. "I want a car from 2026-06-01 to 2026-06-05", "une voiture du 1 au 5 juin"), call 'show_available_fleet' with those dates to present ONLY the cars available for that period. Do NOT call 'show_fleet' in that case.
+       - Never list vehicles as plain text — always use a fleet tool.
+    2. **DATES**:
+       - If dates are NOT yet known once a car is chosen, your ONLY NEXT MESSAGE must be: "What dates would you like to rent the [Car Name] for?" (or the exact translation), then wait for the user's dates.
+       - If dates were ALREADY provided (e.g. via 'show_available_fleet'), do NOT ask for them again.
+       - **WARNING**: NEVER assume or invent dates.
+    3. **AVAILABILITY CHECK**: When a specific car is chosen and dates are known but availability was NOT already established via 'show_available_fleet', call 'check_availability'.
+    4. **QUOTE / DEVIS (ON REQUEST ONLY)**: If — once a car and dates are known — the user asks for a quote, devis, estimate, or price breakdown, call 'prepare_quote' with the vehicleId and dates. This shows the user a button to view/print the quote. Do NOT call 'prepare_quote' unless the user explicitly asks. After a quote, simply continue the normal flow.
+    5. **USER DETAILS**: To place a booking, ask for First Name, then Last Name, then Email, then Phone (ONE-BY-ONE).
+    6. **SUMMARY**: Call 'prepare_booking' only after Step 5 is complete and all required fields are gathered.
 
     ### RESPONSE GUIDELINES
     - **TONE**: Warm, refined Moroccan hospitality — courteous, professional, and confident. Never robotic or over-eager. Always quote prices in MAD.
@@ -319,10 +324,25 @@ export class AiService {
             type: 'function',
             function: {
               name: 'show_fleet',
-              description: 'Show the list of available cars with cards and images',
+              description: 'Show the full list of cars with cards and images. Use when the user wants to rent but has NOT provided dates.',
               parameters: {
                 type: 'object',
                 properties: {}
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'show_available_fleet',
+              description: 'Show ONLY the cars available for a given date range, as UI cards. Use when the user provides rental dates in their request (e.g. "a car from June 1 to June 5").',
+              parameters: {
+                type: 'object',
+                properties: {
+                  startDate: { type: 'string', description: 'YYYY-MM-DD (provided by the user)' },
+                  endDate: { type: 'string', description: 'YYYY-MM-DD (provided by the user)' }
+                },
+                required: ['startDate', 'endDate']
               }
             }
           },
@@ -361,6 +381,22 @@ export class AiService {
                 required: ['vehicleId', 'startDate', 'endDate', 'firstName', 'lastName', 'email', 'phone']
               }
             }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'prepare_quote',
+              description: 'Generate a printable price quote (devis) for a specific car and date range, shown to the user as a button to view/download. Call ONLY when the user explicitly asks for a quote/devis/estimate.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  vehicleId: { type: 'string' },
+                  startDate: { type: 'string', description: 'YYYY-MM-DD' },
+                  endDate: { type: 'string', description: 'YYYY-MM-DD' }
+                },
+                required: ['vehicleId', 'startDate', 'endDate']
+              }
+            }
           }
         ],
         tool_choice: 'auto',
@@ -381,6 +417,25 @@ export class AiService {
               answer: "Here is our current fleet of available vehicles. You can click on any car to select it!",
               timestamp: new Date().toISOString(),
               fleetData: agency.vehicles
+            };
+          }
+
+          if (toolCall.function.name === 'show_available_fleet') {
+            const start = new Date(args.startDate);
+            const end = new Date(args.endDate);
+            const checked = await Promise.all(
+              agency.vehicles.map(async (v: any) =>
+                (await this.bookingService.isVehicleAvailable(v.id, start, end)) ? v : null
+              )
+            );
+            const available = checked.filter(Boolean);
+            return {
+              answer: available.length
+                ? `Here are the cars available from ${args.startDate} to ${args.endDate}. Click one to select it!`
+                : `Unfortunately, no cars are available from ${args.startDate} to ${args.endDate}. Would you like to try different dates?`,
+              timestamp: new Date().toISOString(),
+              fleetData: available,
+              quoteDates: { start: args.startDate, end: args.endDate }
             };
           }
 
@@ -430,6 +485,29 @@ export class AiService {
                   bookingData: {
                       ...args,
                       vehicleDetails: vehicle
+                  }
+              };
+          }
+
+          if (toolCall.function.name === 'prepare_quote') {
+              const vehicle = agency.vehicles.find((v: any) => v.id === args.vehicleId);
+              if (!vehicle) {
+                  return { answer: 'I could not find that vehicle to prepare a quote.', timestamp: new Date().toISOString() };
+              }
+              const start = new Date(args.startDate);
+              const end = new Date(args.endDate);
+              const diffDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) || 1);
+              const total = diffDays * vehicle.pricePerDay;
+              return {
+                  answer: `Here is your quote (devis) for the ${vehicle.make} ${vehicle.model} — ${diffDays} day(s), total ${total} MAD. Tap below to view or download it.`,
+                  timestamp: new Date().toISOString(),
+                  quoteData: {
+                      vehicleDetails: vehicle,
+                      startDate: args.startDate,
+                      endDate: args.endDate,
+                      days: diffDays,
+                      total,
+                      deposit: agency.depositAmount
                   }
               };
           }
