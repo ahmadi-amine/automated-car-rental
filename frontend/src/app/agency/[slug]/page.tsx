@@ -32,6 +32,12 @@ export default function PublicAgencyPage() {
         end: ''
     });
 
+    // Quote (devis) state
+    const [showQuote, setShowQuote] = useState(false);
+    const [quoteVehicle, setQuoteVehicle] = useState<any>(null);
+    const [quoteDates, setQuoteDates] = useState({ start: '', end: '' });
+    const [quoteMeta, setQuoteMeta] = useState<{ number: string; date: string }>({ number: '', date: '' });
+
     useEffect(() => {
         if (slug) {
             fetchAgency();
@@ -119,6 +125,31 @@ export default function PublicAgencyPage() {
         const diffDays = Math.round((endUTC - startUTC) / msPerDay);
         const nights = diffDays > 0 ? diffDays : 1;
         return nights * selectedVehicle.pricePerDay;
+    };
+
+    const nightsBetween = (s: string, e: string) => {
+        if (!s || !e) return 0;
+        const [ys, ms, ds] = s.split('-').map(Number);
+        const [ye, me, de] = e.split('-').map(Number);
+        const diff = Math.round((Date.UTC(ye, me - 1, de) - Date.UTC(ys, ms - 1, ds)) / 86400000);
+        return diff > 0 ? diff : (s === e ? 1 : 0);
+    };
+
+    const openQuote = (v: any) => {
+        setQuoteVehicle(v);
+        setQuoteDates({ start: filterDates.start, end: filterDates.end });
+        const now = new Date();
+        const num = `Q-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+        setQuoteMeta({ number: num, date: now.toLocaleDateString() });
+        setShowQuote(true);
+    };
+
+    const bookFromQuote = () => {
+        setSelectedVehicle(quoteVehicle);
+        setBookingForm(prev => ({ ...prev, startDate: quoteDates.start, endDate: quoteDates.end }));
+        setShowQuote(false);
+        setShowBookingModal(true);
+        setBookingStep(1);
     };
 
     if (loading) {
@@ -289,22 +320,39 @@ export default function PublicAgencyPage() {
                                             <span style={{ fontSize: '20px', fontWeight: '800', color: primaryColor }}>{v.pricePerDay} MAD</span>
                                             <span style={{ fontSize: '14px', color: '#a99a83' }}> / day</span>
                                         </div>
-                                        <button 
-                                            onClick={() => !v.isBooked && handleBookNow(v)}
-                                            disabled={v.isBooked}
-                                            style={{ 
-                                                background: v.isBooked ? 'rgba(240,232,214,0.05)' : primaryColor, 
-                                                color: v.isBooked ? '#837763' : 'white', 
-                                                padding: '8px 20px', 
-                                                borderRadius: '10px', 
-                                                fontWeight: '600',
-                                                fontSize: '14px',
-                                                cursor: v.isBooked ? 'not-allowed' : 'pointer',
-                                                border: v.isBooked ? '1px solid rgba(240,232,214,0.1)' : 'none'
-                                            }}
-                                        >
-                                            {v.isBooked ? 'Unavailable' : 'Book Now'}
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={() => openQuote(v)}
+                                                style={{
+                                                    background: 'transparent',
+                                                    color: primaryColor,
+                                                    padding: '8px 14px',
+                                                    borderRadius: '10px',
+                                                    fontWeight: '600',
+                                                    fontSize: '14px',
+                                                    cursor: 'pointer',
+                                                    border: `1px solid ${primaryColor}`
+                                                }}
+                                            >
+                                                Quote
+                                            </button>
+                                            <button
+                                                onClick={() => !v.isBooked && handleBookNow(v)}
+                                                disabled={v.isBooked}
+                                                style={{
+                                                    background: v.isBooked ? 'rgba(240,232,214,0.05)' : primaryColor,
+                                                    color: v.isBooked ? '#837763' : 'white',
+                                                    padding: '8px 20px',
+                                                    borderRadius: '10px',
+                                                    fontWeight: '600',
+                                                    fontSize: '14px',
+                                                    cursor: v.isBooked ? 'not-allowed' : 'pointer',
+                                                    border: v.isBooked ? '1px solid rgba(240,232,214,0.1)' : 'none'
+                                                }}
+                                            >
+                                                {v.isBooked ? 'Unavailable' : 'Book Now'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -478,10 +526,116 @@ export default function PublicAgencyPage() {
                 </div>
             )}
 
-            <ChatbotWidget 
-                agencySlug={slug as string} 
-                primaryColor={primaryColor} 
-                agencyName={agency.name} 
+            {/* Quote (Devis) Modal */}
+            {showQuote && quoteVehicle && (() => {
+                const days = nightsBetween(quoteDates.start, quoteDates.end);
+                const unit = quoteVehicle.pricePerDay;
+                const subtotal = days * unit;
+                const deposit = agency.depositAmount || 0;
+                return (
+                    <div className="modalOverlay no-print" onClick={() => setShowQuote(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,8,6,0.72)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, padding: '30px 20px', overflowY: 'auto' }}>
+                        <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '620px' }}>
+                            <div className="devis-printable" style={{ background: '#ffffff', color: '#1a1a1a', borderRadius: '10px', padding: '40px', fontFamily: 'var(--font-sans)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div>
+                                        <div style={{ fontSize: '22px', fontWeight: 700, color: '#111' }}>{agency.name}</div>
+                                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px', lineHeight: 1.6 }}>
+                                            {agency.address && <div>{agency.address}</div>}
+                                            {agency.phone && <div>{agency.phone}</div>}
+                                            {(agency.publicEmail || agency.user?.email) && <div>{agency.publicEmail || agency.user?.email}</div>}
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '0.05em', color: primaryColor }}>DEVIS</div>
+                                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>N° {quoteMeta.number}</div>
+                                        <div style={{ fontSize: '12px', color: '#666' }}>Date : {quoteMeta.date}</div>
+                                        <div style={{ fontSize: '12px', color: '#666' }}>Valable 7 jours</div>
+                                    </div>
+                                </div>
+                                <div style={{ height: '3px', background: primaryColor, borderRadius: '2px', margin: '16px 0 24px' }} />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px', fontSize: '13px' }}>
+                                    <div>
+                                        <div style={{ color: '#888', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.06em', marginBottom: '4px' }}>Véhicule</div>
+                                        <div style={{ fontWeight: 600 }}>{quoteVehicle.make} {quoteVehicle.model} ({quoteVehicle.year})</div>
+                                        <div style={{ color: '#666' }}>{quoteVehicle.category}</div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: '#888', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.06em', marginBottom: '4px' }}>Période de location</div>
+                                        {days > 0 ? (
+                                            <>
+                                                <div style={{ fontWeight: 600 }}>{quoteDates.start} → {quoteDates.end}</div>
+                                                <div style={{ color: '#666' }}>{days} jour(s)</div>
+                                            </>
+                                        ) : (
+                                            <div style={{ color: '#b00' }}>Choisissez des dates ci-dessous</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="no-print" style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '4px' }}>Pick-up date</label>
+                                        <input type="date" value={quoteDates.start} min={new Date().toISOString().split('T')[0]} onChange={(e) => setQuoteDates(p => ({ ...p, start: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', color: '#111', background: '#fff' }} />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '4px' }}>Return date</label>
+                                        <input type="date" value={quoteDates.end} min={quoteDates.start || new Date().toISOString().split('T')[0]} onChange={(e) => setQuoteDates(p => ({ ...p, end: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '6px', color: '#111', background: '#fff' }} />
+                                    </div>
+                                </div>
+
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', marginBottom: '20px' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '2px solid #eee', color: '#888', textAlign: 'left' }}>
+                                            <th style={{ padding: '8px 0' }}>Description</th>
+                                            <th style={{ padding: '8px 0', textAlign: 'center' }}>Jours</th>
+                                            <th style={{ padding: '8px 0', textAlign: 'right' }}>Prix/jour</th>
+                                            <th style={{ padding: '8px 0', textAlign: 'right' }}>Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                            <td style={{ padding: '10px 0' }}>Location {quoteVehicle.make} {quoteVehicle.model}</td>
+                                            <td style={{ padding: '10px 0', textAlign: 'center' }}>{days}</td>
+                                            <td style={{ padding: '10px 0', textAlign: 'right' }}>{unit} MAD</td>
+                                            <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: 600 }}>{subtotal} MAD</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div style={{ marginLeft: 'auto', width: '260px', fontSize: '13px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                                        <span style={{ color: '#666' }}>Sous-total</span><span>{subtotal} MAD</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                                        <span style={{ color: '#666' }}>Caution (remboursable)</span><span>{deposit} MAD</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '2px solid #eee', marginTop: '4px', fontWeight: 700, fontSize: '15px' }}>
+                                        <span>Total estimé</span><span style={{ color: primaryColor }}>{subtotal} MAD</span>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: '28px', paddingTop: '16px', borderTop: '1px solid #eee', fontSize: '11px', color: '#888', lineHeight: 1.7 }}>
+                                    <div>Âge minimum du conducteur : {agency.minAge} ans · Caution : {deposit} MAD (remboursable).</div>
+                                    <div>Estimation non contractuelle, valable 7 jours. Prix en MAD.</div>
+                                    {agency.rentalConditions && <div style={{ marginTop: '6px' }}>{agency.rentalConditions}</div>}
+                                </div>
+                            </div>
+
+                            <div className="no-print" style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                <button onClick={() => setShowQuote(false)} style={{ padding: '12px 20px', borderRadius: '10px', background: 'rgba(240,232,214,0.08)', color: 'white', border: '1px solid rgba(240,232,214,0.15)', cursor: 'pointer', fontWeight: 600 }}>Close</button>
+                                <button onClick={() => window.print()} disabled={days <= 0} style={{ padding: '12px 20px', borderRadius: '10px', background: 'rgba(240,232,214,0.08)', color: 'white', border: '1px solid rgba(240,232,214,0.15)', cursor: days > 0 ? 'pointer' : 'not-allowed', fontWeight: 600, opacity: days > 0 ? 1 : 0.5 }}>Print / Download PDF</button>
+                                <button onClick={bookFromQuote} disabled={days <= 0 || quoteVehicle.isBooked} style={{ padding: '12px 22px', borderRadius: '10px', background: primaryColor, color: 'white', border: 'none', cursor: (days > 0 && !quoteVehicle.isBooked) ? 'pointer' : 'not-allowed', fontWeight: 700, opacity: (days > 0 && !quoteVehicle.isBooked) ? 1 : 0.5 }}>Book this car</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
+
+            <ChatbotWidget
+                agencySlug={slug as string}
+                primaryColor={primaryColor}
+                agencyName={agency.name}
             />
         </div>
     );
