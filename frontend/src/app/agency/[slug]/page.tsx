@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Car, Calendar, DollarSign, Info, MapPin, Phone, Mail, ShieldCheck, Clock, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { Car, Calendar, DollarSign, Info, MapPin, Phone, Mail, ShieldCheck, Clock, X, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { getApiUrl } from '@/utils/api';
 
@@ -223,6 +223,8 @@ export default function PublicAgencyPage() {
                         {agency.vehicles?.map((v: any) => {
                             const thumbs = [v.imageUrl, ...(v.images || [])].filter(Boolean);
                             const cur = activeImg[v.id] || v.imageUrl || (v.images && v.images[0]);
+                            const idx = Math.max(0, thumbs.indexOf(cur));
+                            const goTo = (dir: number) => setActiveImg(prev => ({ ...prev, [v.id]: thumbs[(idx + dir + thumbs.length) % thumbs.length] }));
                             return (
                             <div key={v.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', transition: '0.3s' }}>
                                 <div style={{ height: '200px', background: '#241f18', position: 'relative' }}>
@@ -243,6 +245,23 @@ export default function PublicAgencyPage() {
                                             {v.category}
                                         </div>
                                     </div>
+                                    {thumbs.length > 1 && (
+                                        <>
+                                            <button
+                                                onClick={() => goTo(-1)}
+                                                aria-label="Previous photo"
+                                                style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(10,8,6,0.55)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+                                            ><ChevronLeft size={18} /></button>
+                                            <button
+                                                onClick={() => goTo(1)}
+                                                aria-label="Next photo"
+                                                style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(10,8,6,0.55)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+                                            ><ChevronRight size={18} /></button>
+                                            <div style={{ position: 'absolute', bottom: '8px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(10,8,6,0.55)', color: 'white', fontSize: '11px', padding: '2px 8px', borderRadius: '10px', backdropFilter: 'blur(4px)' }}>
+                                                {idx + 1} / {thumbs.length}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 {thumbs.length > 1 && (
                                     <div style={{ display: 'flex', gap: '6px', padding: '8px 12px 0', flexWrap: 'wrap' }}>
