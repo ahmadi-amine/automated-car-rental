@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, Users, Settings, CheckCircle, Clock } from 'lucide-react';
 import Sparkline from './Sparkline';
 
 interface AdminDashboardProps {
@@ -131,13 +130,9 @@ export default function AdminDashboard({ agencies, stats, onApprove }: AdminDash
                                         <td>{new Date(agencyUser.createdAt).toLocaleDateString()}</td>
                                         <td>
                                             {agencyUser.isApproved ? (
-                                                <span className="statusBadge approved">
-                                                    <CheckCircle size={14} /> Approved
-                                                </span>
+                                                <span className="statusBadge approved">Approved</span>
                                             ) : (
-                                                <span className="statusBadge pending">
-                                                    <Clock size={14} /> Pending
-                                                </span>
+                                                <span className="statusBadge pending">Pending</span>
                                             )}
                                         </td>
                                         <td>

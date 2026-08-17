@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { getApiUrl } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Car, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import './login.css';
 
 export default function LoginPage() {
@@ -51,7 +51,6 @@ export default function LoginPage() {
             <div className="loginCard glass">
                 <div className="header">
                     <div className="logo">
-                        <Car size={40} className="logoIcon" />
                         <span className="title">LuxDrive</span>
                     </div>
                     <p className="subtitle">Welcome back! Please enter your credentials.</p>
@@ -63,10 +62,9 @@ export default function LoginPage() {
                     <div className="inputGroup">
                         <label className="label">Email Address</label>
                         <div className="inputWrapper">
-                            <Mail className="inputIcon" size={20} />
                             <input
                                 type="email"
-                                className="input inputWithIcon"
+                                className="input"
                                 placeholder="admin@carrental.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -78,10 +76,9 @@ export default function LoginPage() {
                     <div className="inputGroup">
                         <label className="label">Password</label>
                         <div className="inputWrapper">
-                            <Lock className="inputIcon" size={20} />
                             <input
                                 type="password"
-                                className="input inputWithIcon"
+                                className="input"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -94,10 +91,7 @@ export default function LoginPage() {
                         {isLoading ? (
                             <Loader2 className="animate-spin" size={20} />
                         ) : (
-                            <>
-                                Sign In
-                                <ArrowRight size={20} />
-                            </>
+                            'Sign In'
                         )}
                     </button>
                 </form>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { getApiUrl } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Car, Mail, Lock, Building, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import './register.css';
 
 export default function RegisterPage() {
@@ -57,7 +57,7 @@ export default function RegisterPage() {
         return (
             <div className="container">
                 <div className="registerCard glass successState">
-                    <CheckCircle2 size={64} className="successIcon" />
+                    <div className="successIcon" style={{ fontSize: '48px' }}>✓</div>
                     <h2>Registration Successful!</h2>
                     <p>Your agency account has been created and is now <strong>pending administrator approval</strong>.</p>
                     <p className="redirectNote">Redirecting to login in a few seconds...</p>
@@ -72,7 +72,6 @@ export default function RegisterPage() {
             <div className="registerCard glass">
                 <div className="header">
                     <div className="logo">
-                        <Car size={40} className="logoIcon" />
                         <span className="title">LuxDrive</span>
                     </div>
                     <p className="subtitle">Join our exclusive B2B car rental network.</p>
@@ -84,7 +83,6 @@ export default function RegisterPage() {
                     <div className="inputGroup">
                         <label className="label">Agency Name</label>
                         <div className="inputWrapper">
-                            <Building className="inputIcon" size={20} />
                             <input
                                 type="text"
                                 name="agencyName"
@@ -100,7 +98,6 @@ export default function RegisterPage() {
                     <div className="inputGroup">
                         <label className="label">Business Email</label>
                         <div className="inputWrapper">
-                            <Mail className="inputIcon" size={20} />
                             <input
                                 type="email"
                                 name="email"
@@ -116,7 +113,6 @@ export default function RegisterPage() {
                     <div className="inputGroup">
                         <label className="label">Password</label>
                         <div className="inputWrapper">
-                            <Lock className="inputIcon" size={20} />
                             <input
                                 type="password"
                                 name="password"
@@ -133,10 +129,7 @@ export default function RegisterPage() {
                         {isLoading ? (
                             <Loader2 className="animate-spin" size={20} />
                         ) : (
-                            <>
-                                Create Agency Account
-                                <ArrowRight size={20} />
-                            </>
+                            'Create Agency Account'
                         )}
                     </button>
                 </form>
