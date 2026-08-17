@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { getApiUrl } from '@/utils/api';
-import { Car, Plus, Package, Calendar, DollarSign, Trash2, Edit2, Loader2, X, MoreVertical, Upload, Camera, Search, ChevronDown, Zap, ChevronLeft, ChevronRight, Users, Mail, Phone, Receipt, FileText, TrendingUp } from 'lucide-react';
+import { Loader2, X, Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { carApi, CarMake, CarModel } from '../utils/carApi';
 
 interface AgencyDashboardProps {
@@ -871,7 +871,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
             <header className="header">
                 <h1>My Fleet</h1>
                 <button onClick={() => { setIsEditing(false); setShowAddModal(true); }} className="approveBtn" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Plus size={18} /> Add New Vehicle
+                    Add New Vehicle
                 </button>
             </header>
 
@@ -888,7 +888,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                     <img src={v.imageUrl || v.images[0]} alt={`${v.make} ${v.model}`} className="carImage" />
                                 ) : (
                                     <div className="carPlaceholder">
-                                        <Car size={48} />
+                                        <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>No photo</span>
                                     </div>
                                 )}
                             </div>
@@ -898,7 +898,6 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         <h3>{v.make} {v.model}</h3>
                                         <p className="carYear">{v.year} • {v.category.toLowerCase()}</p>
                                     </div>
-                                    <button className="carMenuBtn"><MoreVertical size={20} /></button>
                                 </div>
                                 <div className="carStats">
                                     <div className="carStat">
@@ -911,8 +910,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                     </div>
                                 </div>
                                 <div className="carActions">
-                                    <button onClick={() => handleEdit(v)} className="editBtn"><Edit2 size={16} /> Edit</button>
-                                    <button onClick={() => handleDelete(v.id)} className="deleteBtn"><Trash2 size={16} /> Delete</button>
+                                    <button onClick={() => handleEdit(v)} className="editBtn">Edit</button>
+                                    <button onClick={() => handleDelete(v.id)} className="deleteBtn">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -951,8 +950,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 <img src={agencyProfile.bannerUrl} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
-                                    <Upload size={32} />
-                                    <span style={{ fontSize: '14px', marginTop: '8px' }}>Click to upload banner</span>
+                                    <span style={{ fontSize: '14px' }}>Click to upload banner</span>
                                 </div>
                             )}
                             {isUploadingBanner && (
@@ -984,8 +982,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 <img src={agencyProfile.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
-                                    <Camera size={32} />
-                                    <span style={{ fontSize: '14px', marginTop: '8px' }}>Logo</span>
+                                    <span style={{ fontSize: '14px' }}>Logo</span>
                                 </div>
                             )}
                             {isUploadingLogo && (
@@ -1404,7 +1401,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                 onClick={startEditBooking}
                                                 style={{ flex: 1, padding: '12px', fontSize: '14px', background: 'rgba(240,232,214,0.05)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                                             >
-                                                <Edit2 size={15} /> Edit
+                                                Edit
                                             </button>
                                         )}
                                         {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED') && (
@@ -1503,7 +1500,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                 <header className="header" style={{ marginBottom: 24 }}>
                     <h1>Expenses</h1>
                     <button className="submitBtn" onClick={() => setShowExpenseModal(true)} style={{ width: 'auto', padding: '10px 18px', marginLeft: 'auto' }}>
-                        <Plus size={18} /> Add Expense
+                        Add Expense
                     </button>
                 </header>
 
@@ -1539,10 +1536,10 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             <td style={{ color: '#a99a83', fontSize: 13, maxWidth: 240 }}>{e.description || '—'}</td>
                                             <td style={{ fontWeight: 700 }}>{Math.round(e.amount).toLocaleString()} MAD</td>
                                             <td>{e.invoiceUrl
-                                                ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={14} /> View</a>
+                                                ? <a href={e.invoiceUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>View</a>
                                                 : <span style={{ color: '#837763' }}>—</span>}</td>
                                             <td>
-                                                <button onClick={() => deleteExpense(e.id)} className="iconBtn delete" title="Delete"><Trash2 size={16} /></button>
+                                                <button onClick={() => deleteExpense(e.id)} title="Delete" style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Delete</button>
                                             </td>
                                         </tr>
                                     ))}
@@ -1640,8 +1637,8 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, color: '#a99a83', fontSize: 14 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Mail size={15} /> {selectedCustomer.customer.email}</div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Phone size={15} /> {selectedCustomer.customer.phone}</div>
+                                    <div>{selectedCustomer.customer.email}</div>
+                                    <div>{selectedCustomer.customer.phone}</div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
@@ -1783,8 +1780,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                             <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <>
-                                                <Camera size={32} style={{ marginBottom: '8px', opacity: 0.5 }} />
-                                                <span style={{ fontSize: '12px', opacity: 0.5 }}>Click to Upload</span>
+                                                <span style={{ fontSize: '12px', opacity: 0.5 }}>Click to upload photo</span>
                                             </>
                                         )}
                                         <input
@@ -1883,7 +1879,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                                         transition: '0.2s'
                                                     }}
                                                 >
-                                                    {isGettingAiPrice ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
+                                                    {isGettingAiPrice ? <Loader2 size={12} className="animate-spin" /> : null}
                                                     Get AI Suggestion
                                                 </button>
                                             </div>
@@ -1910,7 +1906,6 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <Zap size={16} style={{ color: '#7e2637' }} />
                                                     <span style={{ fontWeight: '700', fontSize: '14px' }}>AI Recommended: {aiPriceSuggestion.suggestedPrice} MAD</span>
                                                 </div>
                                                 <button 
@@ -1975,8 +1970,7 @@ export default function AgencyDashboard({ token, view = 'dashboard' }: AgencyDas
                                         </div>
                                     ))}
                                     <label style={{ width: 92, height: 66, borderRadius: 8, border: '2px dashed var(--border-strong)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)', gap: 2 }}>
-                                        <Plus size={18} />
-                                        <span style={{ fontSize: 10 }}>Add</span>
+                                        <span style={{ fontSize: 12, letterSpacing: '0.04em' }}>+ Add</span>
                                         <input type="file" accept="image/*" multiple onChange={handleGalleryChange} style={{ display: 'none' }} />
                                     </label>
                                 </div>
