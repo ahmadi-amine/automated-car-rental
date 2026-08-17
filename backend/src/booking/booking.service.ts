@@ -123,8 +123,8 @@ export class BookingService {
         const start = dto.startDate ? new Date(dto.startDate) : booking.startDate;
         const end = dto.endDate ? new Date(dto.endDate) : booking.endDate;
 
-        if (end <= start) {
-            throw new BadRequestException('End date must be after start date');
+        if (end < start) {
+            throw new BadRequestException('End date cannot be before the start date');
         }
 
         const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } });
