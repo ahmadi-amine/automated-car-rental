@@ -152,6 +152,30 @@ export default function PublicAgencyPage() {
         setBookingStep(1);
     };
 
+    // Print the devis in its own clean window (exact copy of the on-screen document).
+    const printDevis = () => {
+        const el = document.querySelector('.devis-printable');
+        if (!el) return;
+        const clone = el.cloneNode(true) as HTMLElement;
+        clone.querySelectorAll('.no-print').forEach(n => n.remove());
+        const w = window.open('', '_blank', 'width=820,height=1000');
+        if (!w) { alert('Please allow pop-ups to print or download the quote.'); return; }
+        w.document.open();
+        w.document.write(
+            `<!doctype html><html><head><meta charset="utf-8"><title>Devis ${quoteMeta.number}</title><style>` +
+            `*{box-sizing:border-box;}` +
+            `html,body{margin:0;padding:0;background:#fff;color:#1a1a1a;` +
+            `font-family:'Segoe UI',Arial,Helvetica,sans-serif;` +
+            `-webkit-print-color-adjust:exact;print-color-adjust:exact;}` +
+            `table{border-collapse:collapse;width:100%;}` +
+            `@page{margin:14mm;}` +
+            `</style></head><body>${clone.outerHTML}</body></html>`
+        );
+        w.document.close();
+        w.focus();
+        setTimeout(() => { w.print(); w.close(); }, 350);
+    };
+
     if (loading) {
         return (
             <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#14110d', color: 'white' }}>
@@ -624,7 +648,7 @@ export default function PublicAgencyPage() {
 
                             <div className="no-print" style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                 <button onClick={() => setShowQuote(false)} style={{ padding: '12px 20px', borderRadius: '10px', background: 'rgba(240,232,214,0.08)', color: 'white', border: '1px solid rgba(240,232,214,0.15)', cursor: 'pointer', fontWeight: 600 }}>Close</button>
-                                <button onClick={() => window.print()} disabled={days <= 0} style={{ padding: '12px 20px', borderRadius: '10px', background: 'rgba(240,232,214,0.08)', color: 'white', border: '1px solid rgba(240,232,214,0.15)', cursor: days > 0 ? 'pointer' : 'not-allowed', fontWeight: 600, opacity: days > 0 ? 1 : 0.5 }}>Print / Download PDF</button>
+                                <button onClick={printDevis} disabled={days <= 0} style={{ padding: '12px 20px', borderRadius: '10px', background: 'rgba(240,232,214,0.08)', color: 'white', border: '1px solid rgba(240,232,214,0.15)', cursor: days > 0 ? 'pointer' : 'not-allowed', fontWeight: 600, opacity: days > 0 ? 1 : 0.5 }}>Print / Download PDF</button>
                                 <button onClick={bookFromQuote} disabled={days <= 0 || quoteVehicle.isBooked} style={{ padding: '12px 22px', borderRadius: '10px', background: primaryColor, color: 'white', border: 'none', cursor: (days > 0 && !quoteVehicle.isBooked) ? 'pointer' : 'not-allowed', fontWeight: 700, opacity: (days > 0 && !quoteVehicle.isBooked) ? 1 : 0.5 }}>Book this car</button>
                             </div>
                         </div>

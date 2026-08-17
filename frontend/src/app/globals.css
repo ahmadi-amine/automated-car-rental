@@ -203,22 +203,6 @@ select.input option { background: #211c16; color: var(--text-primary); }
 .submitBtn:active { transform: translateY(0); }
 .submitBtn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-/* Print: isolate the quote (devis) so it prints as a clean white document */
-@media print {
-  body { background: #fff !important; }
-  body * { visibility: hidden !important; }
-  .devis-printable, .devis-printable * { visibility: visible !important; }
-  .devis-printable {
-    position: absolute !important;
-    left: 0; top: 0;
-    width: 100%;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-  }
-  .no-print { display: none !important; }
-}
-
 /* Utility: small brass-outline pill used for tags/labels */
 .pill {
   display: inline-flex;
