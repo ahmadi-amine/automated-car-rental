@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Car, LogOut, LayoutDashboard, Users, Settings, Package, Calendar, Receipt, TrendingUp } from 'lucide-react';
 import AdminDashboard from '../../components/AdminDashboard';
 import AgenciesTable from '../../components/AgenciesTable';
 import AgencyDashboard from '../../components/AgencyDashboard';
@@ -146,7 +145,6 @@ export default function DashboardPage() {
         <div className="dashboardContainer">
             <aside className="sidebar glass">
                 <div className="logoSection">
-                    <Car size={32} className="logoIcon" />
                     <span className="logoText">LuxDrive</span>
                 </div>
 
@@ -155,7 +153,6 @@ export default function DashboardPage() {
                         className={`navItem ${activeTab === 'dashboard' ? 'active' : ''}`}
                         onClick={() => { setActiveTab('dashboard'); router.push('/dashboard?view=dashboard'); }}
                     >
-                        <LayoutDashboard size={20} />
                         <span>Dashboard</span>
                     </div>
 
@@ -164,7 +161,6 @@ export default function DashboardPage() {
                             className={`navItem ${activeTab === 'agencies' ? 'active' : ''}`}
                             onClick={() => { setActiveTab('agencies'); router.push('/dashboard?view=agencies'); }}
                         >
-                            <Users size={20} />
                             <span>Agencies</span>
                         </div>
                     )}
@@ -175,35 +171,30 @@ export default function DashboardPage() {
                                 className={`navItem ${activeTab === 'fleet' ? 'active' : ''}`}
                                 onClick={() => { setActiveTab('fleet'); router.push('/dashboard?view=fleet'); }}
                             >
-                                <Package size={20} />
                                 <span>My Fleet</span>
                             </div>
                             <div
                                 className={`navItem ${activeTab === 'bookings' ? 'active' : ''}`}
                                 onClick={() => { setActiveTab('bookings'); router.push('/dashboard?view=bookings'); }}
                             >
-                                <Calendar size={20} />
                                 <span>Bookings</span>
                             </div>
                             <div
                                 className={`navItem ${activeTab === 'clients' ? 'active' : ''}`}
                                 onClick={() => { setActiveTab('clients'); router.push('/dashboard?view=clients'); }}
                             >
-                                <Users size={20} />
                                 <span>Clients</span>
                             </div>
                             <div
                                 className={`navItem ${activeTab === 'expenses' ? 'active' : ''}`}
                                 onClick={() => { setActiveTab('expenses'); router.push('/dashboard?view=expenses'); }}
                             >
-                                <Receipt size={20} />
                                 <span>Expenses</span>
                             </div>
                             <div
                                 className={`navItem ${activeTab === 'profitability' ? 'active' : ''}`}
                                 onClick={() => { setActiveTab('profitability'); router.push('/dashboard?view=profitability'); }}
                             >
-                                <TrendingUp size={20} />
                                 <span>Profitability</span>
                             </div>
                         </>
@@ -213,13 +204,11 @@ export default function DashboardPage() {
                         className={`navItem ${activeTab === 'settings' ? 'active' : ''}`}
                         onClick={() => { setActiveTab('settings'); router.push('/dashboard?view=settings'); }}
                     >
-                        <Settings size={20} />
                         <span>Settings</span>
                     </div>
                 </nav>
 
                 <button onClick={handleLogout} className="logoutBtn">
-                    <LogOut size={20} />
                     <span>Logout</span>
                 </button>
             </aside>
