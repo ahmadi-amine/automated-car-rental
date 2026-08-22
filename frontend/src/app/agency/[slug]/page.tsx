@@ -48,6 +48,18 @@ export default function PublicAgencyPage() {
         fetchCustomerMe(t).then(setCustomer).catch(() => clearCustomerToken());
     }, []);
 
+    // Prefill the booking form with the signed-in client's details (only fills blanks)
+    useEffect(() => {
+        if (!customer) return;
+        setBookingForm(prev => ({
+            ...prev,
+            firstName: prev.firstName || customer.firstName || '',
+            lastName: prev.lastName || customer.lastName || '',
+            email: prev.email || customer.email || '',
+            phone: prev.phone || customer.phone || '',
+        }));
+    }, [customer]);
+
     const logoutCustomer = () => {
         clearCustomerToken();
         setCustomer(null);
