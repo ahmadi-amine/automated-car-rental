@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { getApiUrl } from '@/utils/api';
-import { getCustomerToken, clearCustomerToken, fetchCustomerMe } from '@/utils/customerAuth';
+import { getCustomerToken, setCustomerToken, clearCustomerToken, customerRegister, customerLogin, fetchCustomerMe } from '@/utils/customerAuth';
 
 export default function PublicAgencyPage() {
     const { slug } = useParams();
@@ -51,6 +51,37 @@ export default function PublicAgencyPage() {
     const logoutCustomer = () => {
         clearCustomerToken();
         setCustomer(null);
+    };
+
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+    const [authForm, setAuthForm] = useState({ fullName: '', email: '', password: '' });
+    const [authError, setAuthError] = useState('');
+    const [isAuthLoading, setIsAuthLoading] = useState(false);
+
+    const openAuth = (mode: 'login' | 'register') => {
+        setAuthMode(mode);
+        setAuthForm({ fullName: '', email: '', password: '' });
+        setAuthError('');
+        setShowAuthModal(true);
+    };
+
+    const submitAuth = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setAuthError('');
+        setIsAuthLoading(true);
+        try {
+            const res = authMode === 'register'
+                ? await customerRegister(authForm.fullName, authForm.email, authForm.password)
+                : await customerLogin(authForm.email, authForm.password);
+            setCustomerToken(res.access_token);
+            setCustomer(res.customer);
+            setShowAuthModal(false);
+        } catch (err: any) {
+            setAuthError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsAuthLoading(false);
+        }
     };
 
     useEffect(() => {
