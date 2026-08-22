@@ -511,7 +511,18 @@ export default function PublicAgencyPage() {
                         {bookingStep === 1 ? (
                             <>
                                 <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>Complete Your Booking</h2>
-                                <p style={{ color: '#a99a83', marginBottom: '24px' }}>Renting {selectedVehicle?.make} {selectedVehicle?.model}</p>
+                                <p style={{ color: '#a99a83', marginBottom: '20px' }}>Renting {selectedVehicle?.make} {selectedVehicle?.model}</p>
+
+                                {customer ? (
+                                    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 16px', marginBottom: '24px', fontSize: '13px', color: '#a99a83' }}>
+                                        Signed in as <strong style={{ color: 'white' }}>{customer.firstName} {customer.lastName}</strong> — your details are filled in below.
+                                    </div>
+                                ) : (
+                                    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 16px', marginBottom: '24px', fontSize: '13px', color: '#a99a83', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                        <span>Have an account? Sign in to fill this in automatically.</span>
+                                        <button type="button" onClick={() => openAuth('login')} style={{ ...authLinkStyle, whiteSpace: 'nowrap' }}>Sign in</button>
+                                    </div>
+                                )}
 
                                 <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
