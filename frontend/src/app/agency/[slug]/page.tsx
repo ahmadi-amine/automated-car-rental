@@ -239,6 +239,8 @@ export default function PublicAgencyPage() {
     }
 
     const primaryColor = agency.primaryColor || '#7e2637';
+    const authInputStyle: React.CSSProperties = { padding: '12px 14px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', fontSize: '14px', width: '100%' };
+    const authLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: primaryColor, cursor: 'pointer', fontWeight: 600, padding: 0 };
 
     return (
         <div style={{ background: '#14110d', minHeight: '100vh', color: 'white', fontFamily: 'var(--font-sans)' }}>
@@ -592,6 +594,40 @@ export default function PublicAgencyPage() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Client Sign-in / Register Modal */}
+            {showAuthModal && (
+                <div className="modalOverlay" onClick={() => setShowAuthModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,8,6,0.72)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' }}>
+                    <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '420px', background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: '14px', padding: '32px', color: 'white' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <h2 style={{ fontSize: '22px', margin: 0 }}>{authMode === 'register' ? 'Create account' : 'Sign in'}</h2>
+                            <button onClick={() => setShowAuthModal(false)} style={{ background: 'none', border: 'none', color: '#a99a83', cursor: 'pointer' }}><X size={22} /></button>
+                        </div>
+                        <p style={{ color: '#a99a83', fontSize: '13px', marginTop: 0, marginBottom: '20px' }}>Optional — sign in to book faster next time. You can always book as a guest.</p>
+
+                        {authError && <div style={{ background: 'var(--error-soft)', border: '1px solid var(--error)', color: 'var(--error)', padding: '10px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>{authError}</div>}
+
+                        <form onSubmit={submitAuth} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            {authMode === 'register' && (
+                                <input type="text" required placeholder="Full name" value={authForm.fullName} onChange={(e) => setAuthForm({ ...authForm, fullName: e.target.value })} style={authInputStyle} />
+                            )}
+                            <input type="email" required placeholder="Email" value={authForm.email} onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} style={authInputStyle} />
+                            <input type="password" required placeholder="Password" value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} style={authInputStyle} />
+                            <button type="submit" disabled={isAuthLoading} style={{ marginTop: '4px', padding: '12px', background: primaryColor, color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                {isAuthLoading ? <Loader2 size={18} className="animate-spin" /> : (authMode === 'register' ? 'Create account' : 'Sign in')}
+                            </button>
+                        </form>
+
+                        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#a99a83' }}>
+                            {authMode === 'register' ? (
+                                <>Already have an account? <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={authLinkStyle}>Sign in</button></>
+                            ) : (
+                                <>New here? <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={authLinkStyle}>Create an account</button></>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
