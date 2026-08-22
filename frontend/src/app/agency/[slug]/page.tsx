@@ -244,6 +244,18 @@ export default function PublicAgencyPage() {
 
     return (
         <div style={{ background: '#14110d', minHeight: '100vh', color: 'white', fontFamily: 'var(--font-sans)' }}>
+            {/* Client account control */}
+            <div style={{ position: 'fixed', top: '16px', right: '16px', zIndex: 900, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {customer ? (
+                    <>
+                        <span style={{ background: 'rgba(20,17,13,0.72)', backdropFilter: 'blur(6px)', border: '1px solid var(--border)', borderRadius: '999px', padding: '8px 14px', fontSize: '13px', fontWeight: 600 }}>Hi, {customer.firstName}</span>
+                        <button onClick={logoutCustomer} style={{ background: 'rgba(20,17,13,0.72)', backdropFilter: 'blur(6px)', border: '1px solid var(--border)', borderRadius: '999px', padding: '8px 14px', fontSize: '13px', color: '#a99a83', cursor: 'pointer' }}>Log out</button>
+                    </>
+                ) : (
+                    <button onClick={() => openAuth('login')} style={{ background: primaryColor, border: 'none', borderRadius: '999px', padding: '9px 18px', fontSize: '13px', fontWeight: 700, color: 'white', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.4)' }}>Sign in</button>
+                )}
+            </div>
+
             {/* Banner */}
             <div style={{ 
                 height: '300px', 
