@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { getApiUrl } from '@/utils/api';
+import { getCustomerToken, clearCustomerToken, fetchCustomerMe } from '@/utils/customerAuth';
 
 export default function PublicAgencyPage() {
     const { slug } = useParams();
@@ -37,6 +38,20 @@ export default function PublicAgencyPage() {
     const [quoteVehicle, setQuoteVehicle] = useState<any>(null);
     const [quoteDates, setQuoteDates] = useState({ start: '', end: '' });
     const [quoteMeta, setQuoteMeta] = useState<{ number: string; date: string }>({ number: '', date: '' });
+
+    // Optional client account
+    const [customer, setCustomer] = useState<any>(null);
+
+    useEffect(() => {
+        const t = getCustomerToken();
+        if (!t) return;
+        fetchCustomerMe(t).then(setCustomer).catch(() => clearCustomerToken());
+    }, []);
+
+    const logoutCustomer = () => {
+        clearCustomerToken();
+        setCustomer(null);
+    };
 
     useEffect(() => {
         if (slug) {
