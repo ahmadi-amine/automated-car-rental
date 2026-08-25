@@ -1,19 +1,28 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
 @Injectable()
 export class MailService {
     private readonly logger = new Logger(MailService.name);
-    private readonly resend: Resend | null;
+    private readonly transporter: Transporter | null;
     private readonly from: string;
 
     constructor(private readonly config: ConfigService) {
-        const apiKey = this.config.get<string>('RESEND_API_KEY');
-        this.from = this.config.get<string>('MAIL_FROM', 'LuxDrive <onboarding@resend.dev>');
-        this.resend = apiKey ? new Resend(apiKey) : null;
-        if (!this.resend) {
-            this.logger.warn('RESEND_API_KEY is not set — outgoing emails are disabled.');
+        const user = this.config.get<string>('GMAIL_USER');
+        const pass = this.config.get<string>('GMAIL_APP_PASSWORD');
+        this.from = this.config.get<string>('MAIL_FROM') || (user ? `LuxDrive <${user}>` : 'LuxDrive');
+        this.transporter = user && pass
+            ? nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true,
+                auth: { user, pass },
+            })
+            : null;
+        if (!this.transporter) {
+            this.logger.warn('GMAIL_USER/GMAIL_APP_PASSWORD not set — outgoing emails are disabled.');
         }
     }
 
@@ -22,16 +31,12 @@ export class MailService {
      * request that triggered it. Returns true on success, false otherwise.
      */
     async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-        if (!this.resend) {
+        if (!this.transporter) {
             this.logger.warn(`Email to ${to} skipped (mailer disabled): ${subject}`);
             return false;
         }
         try {
-            const { error } = await this.resend.emails.send({ from: this.from, to, subject, html });
-            if (error) {
-                this.logger.error(`Failed to send email to ${to}: ${error.message}`);
-                return false;
-            }
+            await this.transporter.sendMail({ from: this.from, to, subject, html });
             this.logger.log(`Email sent to ${to}: ${subject}`);
             return true;
         } catch (err: any) {
