@@ -116,6 +116,7 @@ export class BookingService {
                 customerEmail: booking.customer.email,
                 customerFirstName: booking.customer.firstName,
                 agencyName: booking.agency.name,
+                agencyReplyTo: booking.agency.publicEmail ?? undefined,
                 vehicleMake: booking.vehicle.make,
                 vehicleModel: booking.vehicle.model,
                 startDate: booking.startDate.toISOString(),
