@@ -92,7 +92,7 @@ export class BookingService {
     async updateStatus(bookingId: string, userId: string, status: BookingStatus) {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
-            include: { agency: true }
+            include: { agency: true, customer: true, vehicle: true }
         });
 
         if (!booking) {
@@ -103,11 +103,28 @@ export class BookingService {
             throw new BadRequestException('You do not have permission to manage this booking');
         }
 
-        return this.prisma.booking.update({
+        const updated = await this.prisma.booking.update({
             where: { id: bookingId },
             data: { status },
             include: { vehicle: true }
         });
+
+        // Notify the client when the agency confirms a previously unconfirmed booking.
+        // Best-effort: a mail failure must never break the status update.
+        if (status === BookingStatus.CONFIRMED && booking.status !== BookingStatus.CONFIRMED) {
+            void this.mail.sendBookingConfirmation({
+                customerEmail: booking.customer.email,
+                customerFirstName: booking.customer.firstName,
+                agencyName: booking.agency.name,
+                vehicleMake: booking.vehicle.make,
+                vehicleModel: booking.vehicle.model,
+                startDate: booking.startDate.toISOString(),
+                endDate: booking.endDate.toISOString(),
+                totalPrice: booking.totalPrice,
+            });
+        }
+
+        return updated;
     }
 
     async update(bookingId: string, userId: string, dto: UpdateBookingDto) {
