@@ -13,6 +13,7 @@ import { AiModule } from './ai/ai.module';
 import { CustomerModule } from './customer/customer.module';
 import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { ExpenseModule } from './expense/expense.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ExpenseModule } from './expense/expense.module';
     CustomerModule,
     CustomerAuthModule,
     ExpenseModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
