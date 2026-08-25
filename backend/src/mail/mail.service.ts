@@ -40,7 +40,15 @@ export class MailService {
             return false;
         }
         try {
-            await this.transporter.sendMail({ from: this.from, to, subject, html });
+            // Hard cap: nodemailer's socket timeouts don't always fire when the SMTP
+            // server accepts the connection then stalls (e.g. Gmail throttling), so we
+            // race the send against our own deadline and never wait longer than this.
+            await Promise.race([
+                this.transporter.sendMail({ from: this.from, to, subject, html }),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('send timed out after 25s')), 25000),
+                ),
+            ]);
             this.logger.log(`Email sent to ${to}: ${subject}`);
             return true;
         } catch (err: any) {
