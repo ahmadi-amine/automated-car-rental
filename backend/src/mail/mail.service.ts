@@ -64,7 +64,13 @@ export class MailService {
             return false;
         }
         const subject = `Your booking with ${data.agencyName} is confirmed`;
-        return this.sendEmail(data.customerEmail, subject, this.bookingConfirmationTemplate(data));
+        // Replies go to the agency's own inbox when it has a public email set.
+        return this.sendEmail(
+            data.customerEmail,
+            subject,
+            this.bookingConfirmationTemplate(data),
+            data.agencyReplyTo || undefined,
+        );
     }
 
     private bookingConfirmationTemplate(d: BookingConfirmationData): string {
@@ -111,6 +117,8 @@ export interface BookingConfirmationData {
     customerEmail: string;
     customerFirstName: string;
     agencyName: string;
+    /** Agency's public contact email; used as the reply-to so client replies reach them. */
+    agencyReplyTo?: string;
     vehicleMake: string;
     vehicleModel: string;
     startDate: string;
