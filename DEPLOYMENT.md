@@ -30,6 +30,12 @@ Copy the templates and fill in real values. **Never commit real secrets** —
 ### Backend (`backend/.env`, manual/local runs) — see `backend/.env.example`
 `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `PORT`, `OPENAI_API_KEY`, `CORS_ORIGIN`.
 
+**Email (booking confirmations, optional):** `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `MAIL_FROM`.
+Sends the client a confirmation when an agency confirms a booking, via Gmail SMTP.
+`GMAIL_APP_PASSWORD` is a 16-char Google App Password (needs 2-Step Verification), not the
+account password. Leave `GMAIL_APP_PASSWORD` empty to disable emailing. See the README's
+"Email notifications" section for details.
+
 > **Important — `NEXT_PUBLIC_API_URL` is baked at build time.** Next.js inlines
 > `NEXT_PUBLIC_*` during `next build`, so it is passed as a Docker **build arg**, not a
 > runtime env var. Set it to the URL the end-user's browser will use to reach the API
