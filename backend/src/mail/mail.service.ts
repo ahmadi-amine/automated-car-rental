@@ -19,6 +19,10 @@ export class MailService {
                 port: 465,
                 secure: true,
                 auth: { user, pass },
+                // Fail fast instead of hanging a request if Gmail is slow/throttling.
+                connectionTimeout: 15000,
+                greetingTimeout: 15000,
+                socketTimeout: 20000,
             })
             : null;
         if (!this.transporter) {
