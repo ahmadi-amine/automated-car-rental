@@ -109,20 +109,24 @@ export class BookingService {
             include: { vehicle: true }
         });
 
-        // Notify the client when the agency confirms a previously unconfirmed booking.
-        // Best-effort: a mail failure must never break the status update.
-        if (status === BookingStatus.CONFIRMED && booking.status !== BookingStatus.CONFIRMED) {
-            void this.mail.sendBookingConfirmation({
-                customerEmail: booking.customer.email,
-                customerFirstName: booking.customer.firstName,
-                agencyName: booking.agency.name,
-                agencyReplyTo: booking.agency.publicEmail ?? undefined,
-                vehicleMake: booking.vehicle.make,
-                vehicleModel: booking.vehicle.model,
-                startDate: booking.startDate.toISOString(),
-                endDate: booking.endDate.toISOString(),
-                totalPrice: booking.totalPrice,
-            });
+        // Notify the client when the agency transitions the booking. Best-effort:
+        // a mail failure must never break the status update.
+        const changed = booking.status !== status;
+        const emailData = {
+            customerEmail: booking.customer.email,
+            customerFirstName: booking.customer.firstName,
+            agencyName: booking.agency.name,
+            agencyReplyTo: booking.agency.publicEmail ?? undefined,
+            vehicleMake: booking.vehicle.make,
+            vehicleModel: booking.vehicle.model,
+            startDate: booking.startDate.toISOString(),
+            endDate: booking.endDate.toISOString(),
+            totalPrice: booking.totalPrice,
+        };
+        if (changed && status === BookingStatus.CONFIRMED) {
+            void this.mail.sendBookingConfirmation(emailData);
+        } else if (changed && status === BookingStatus.CANCELLED) {
+            void this.mail.sendBookingCancellation(emailData);
         }
 
         return updated;
