@@ -34,7 +34,13 @@ export class MailService {
      * Low-level send. Never throws: email is best-effort and must not break the
      * request that triggered it. Returns true on success, false otherwise.
      */
-    async sendEmail(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
+    async sendEmail(
+        to: string,
+        subject: string,
+        html: string,
+        replyTo?: string,
+        text?: string,
+    ): Promise<boolean> {
         if (!this.transporter) {
             this.logger.warn(`Email to ${to} skipped (mailer disabled): ${subject}`);
             return false;
@@ -44,7 +50,7 @@ export class MailService {
             // server accepts the connection then stalls (e.g. Gmail throttling), so we
             // race the send against our own deadline and never wait longer than this.
             await Promise.race([
-                this.transporter.sendMail({ from: this.from, to, subject, html, replyTo }),
+                this.transporter.sendMail({ from: this.from, to, subject, html, replyTo, text }),
                 new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('send timed out after 25s')), 25000),
                 ),
