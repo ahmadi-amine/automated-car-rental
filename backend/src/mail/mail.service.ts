@@ -63,63 +63,110 @@ export class MailService {
         }
     }
 
+    private fmtDate(iso: string): string {
+        return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    private fmtPrice(n: number): string {
+        return `${n.toLocaleString('en-US')} MAD`;
+    }
+
+    /** The standard vehicle / dates / total rows shared by every booking email. */
+    private bookingRows(d: BookingEmailData): Array<[string, string]> {
+        return [
+            ['Vehicle', `${d.vehicleMake} ${d.vehicleModel}`],
+            ['Pick-up', this.fmtDate(d.startDate)],
+            ['Return', this.fmtDate(d.endDate)],
+            ['Total', this.fmtPrice(d.totalPrice)],
+        ];
+    }
+
+    /**
+     * Render a branded email into both an HTML body and a plain-text fallback
+     * (better deliverability + accessibility) from the same structured content.
+     */
+    private renderEmail(c: RenderableEmail): { html: string; text: string } {
+        const accent = c.accent || '#7e2637';
+        const rowHtml = c.rows
+            .map(
+                ([label, value]) => `
+                <tr>
+                    <td style="padding:8px 0;color:#8a7f6f;font-size:13px;">${label}</td>
+                    <td style="padding:8px 0;color:#1c1712;font-size:14px;font-weight:600;text-align:right;">${value}</td>
+                </tr>`,
+            )
+            .join('');
+        const html = `
+        <div style="background:#f4f1ec;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
+            <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6e0d6;">
+                <div style="background:${accent};padding:28px 32px;">
+                    <div style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:0.5px;">${c.agencyName}</div>
+                    <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">${c.headerSubtitle}</div>
+                </div>
+                <div style="padding:32px;">
+                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Hi ${c.greetingName || 'there'},</p>
+                    <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">${c.intro}</p>
+                    <table style="width:100%;border-collapse:collapse;border-top:1px solid #eee;border-bottom:1px solid #eee;">${rowHtml}
+                    </table>
+                    <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:24px 0 0;">${c.footerNote}</p>
+                </div>
+                <div style="padding:16px 32px;background:#faf8f4;border-top:1px solid #eee;color:#a99a83;font-size:12px;text-align:center;">
+                    ${c.agencyName} · Sent via LuxDrive
+                </div>
+            </div>
+        </div>`;
+        const text = [
+            `${c.agencyName} — ${c.headerSubtitle}`,
+            '',
+            `Hi ${c.greetingName || 'there'},`,
+            '',
+            c.intro,
+            '',
+            ...c.rows.map(([label, value]) => `${label}: ${value}`),
+            '',
+            c.footerNote,
+            '',
+            `${c.agencyName} · Sent via LuxDrive`,
+        ].join('\n');
+        return { html, text };
+    }
+
     /** Notify a client that their booking was confirmed by the agency. */
-    async sendBookingConfirmation(data: BookingConfirmationData): Promise<boolean> {
+    async sendBookingConfirmation(data: BookingEmailData): Promise<boolean> {
         if (!data.customerEmail) {
             this.logger.warn('Booking confirmation skipped — customer has no email.');
             return false;
         }
-        const subject = `Your booking with ${data.agencyName} is confirmed`;
+        const { html, text } = this.renderEmail({
+            agencyName: data.agencyName,
+            headerSubtitle: 'Booking confirmed',
+            greetingName: data.customerFirstName,
+            intro: 'Great news — your reservation has been confirmed. Here are your booking details:',
+            rows: this.bookingRows(data),
+            footerNote: 'If you have any questions, just reply to this email. We look forward to seeing you!',
+        });
         // Replies go to the agency's own inbox when it has a public email set.
         return this.sendEmail(
             data.customerEmail,
-            subject,
-            this.bookingConfirmationTemplate(data),
+            `Your booking with ${data.agencyName} is confirmed`,
+            html,
             data.agencyReplyTo || undefined,
+            text,
         );
-    }
-
-    private bookingConfirmationTemplate(d: BookingConfirmationData): string {
-        const fmtDate = (iso: string) =>
-            new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        const fmtPrice = (n: number) => `${n.toLocaleString('en-US')} MAD`;
-        const accent = '#7e2637';
-        const row = (label: string, value: string) => `
-            <tr>
-                <td style="padding:8px 0;color:#8a7f6f;font-size:13px;">${label}</td>
-                <td style="padding:8px 0;color:#1c1712;font-size:14px;font-weight:600;text-align:right;">${value}</td>
-            </tr>`;
-        return `
-        <div style="background:#f4f1ec;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
-            <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6e0d6;">
-                <div style="background:${accent};padding:28px 32px;">
-                    <div style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:0.5px;">${d.agencyName}</div>
-                    <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">Booking confirmed</div>
-                </div>
-                <div style="padding:32px;">
-                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Hi ${d.customerFirstName || 'there'},</p>
-                    <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">
-                        Great news — your reservation has been confirmed. Here are your booking details:
-                    </p>
-                    <table style="width:100%;border-collapse:collapse;border-top:1px solid #eee;border-bottom:1px solid #eee;">
-                        ${row('Vehicle', `${d.vehicleMake} ${d.vehicleModel}`)}
-                        ${row('Pick-up', fmtDate(d.startDate))}
-                        ${row('Return', fmtDate(d.endDate))}
-                        ${row('Total', fmtPrice(d.totalPrice))}
-                    </table>
-                    <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:24px 0 0;">
-                        If you have any questions, just reply to this email. We look forward to seeing you!
-                    </p>
-                </div>
-                <div style="padding:16px 32px;background:#faf8f4;border-top:1px solid #eee;color:#a99a83;font-size:12px;text-align:center;">
-                    ${d.agencyName} · Sent via LuxDrive
-                </div>
-            </div>
-        </div>`;
     }
 }
 
-export interface BookingConfirmationData {
+interface RenderableEmail {
+    agencyName: string;
+    headerSubtitle: string;
+    greetingName?: string;
+    intro: string;
+    rows: Array<[string, string]>;
+    footerNote: string;
+    accent?: string;
+}
+
+export interface BookingEmailData {
     customerEmail: string;
     customerFirstName: string;
     agencyName: string;
