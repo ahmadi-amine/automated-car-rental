@@ -53,7 +53,7 @@ export class BookingService {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
         const totalPrice = diffDays * vehicle.pricePerDay;
 
-        return this.prisma.booking.create({
+        const booking = await this.prisma.booking.create({
             data: {
                 startDate: start,
                 endDate: end,
@@ -68,6 +68,21 @@ export class BookingService {
                 vehicle: true
             }
         });
+
+        // Acknowledge the request to the client. Best-effort — never break the booking.
+        void this.mail.sendBookingReceived({
+            customerEmail: customer.email,
+            customerFirstName: customer.firstName,
+            agencyName: vehicle.agency.name,
+            agencyReplyTo: vehicle.agency.publicEmail ?? undefined,
+            vehicleMake: vehicle.make,
+            vehicleModel: vehicle.model,
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+            totalPrice,
+        });
+
+        return booking;
     }
 
     async findAllForAgency(userId: string) {
