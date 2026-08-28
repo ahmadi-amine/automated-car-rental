@@ -202,6 +202,39 @@ export class MailService {
             text,
         );
     }
+
+    /** Notify the agency that a new booking request came in and needs review. */
+    async sendNewBookingAgencyNotice(data: NewBookingAgencyNoticeData): Promise<boolean> {
+        if (!data.agencyEmail) {
+            this.logger.warn('Agency new-booking notice skipped — agency has no public email.');
+            return false;
+        }
+        const { html, text } = this.renderEmail({
+            agencyName: data.agencyName,
+            headerSubtitle: 'New booking request',
+            greetingName: data.agencyName,
+            intro: 'A new booking request just came in and is waiting for your confirmation:',
+            rows: [
+                ['Customer', data.customerFullName],
+                ['Email', data.customerEmail],
+                ['Phone', data.customerPhone || '—'],
+                ['Vehicle', `${data.vehicleMake} ${data.vehicleModel}`],
+                ['Pick-up', this.fmtDate(data.startDate)],
+                ['Return', this.fmtDate(data.endDate)],
+                ['Total', this.fmtPrice(data.totalPrice)],
+            ],
+            footerNote: 'Log in to your LuxDrive dashboard to confirm or decline. Reply to reach the client directly.',
+            accent: '#3b5b7e',
+        });
+        // Reply-to the client so the agency can respond to them directly.
+        return this.sendEmail(
+            data.agencyEmail,
+            `New booking request from ${data.customerFullName}`,
+            html,
+            data.customerEmail || undefined,
+            text,
+        );
+    }
 }
 
 interface RenderableEmail {
@@ -220,6 +253,20 @@ export interface BookingEmailData {
     agencyName: string;
     /** Agency's public contact email; used as the reply-to so client replies reach them. */
     agencyReplyTo?: string;
+    vehicleMake: string;
+    vehicleModel: string;
+    startDate: string;
+    endDate: string;
+    totalPrice: number;
+}
+
+export interface NewBookingAgencyNoticeData {
+    /** Agency's public email — the recipient of this notice. */
+    agencyEmail: string;
+    agencyName: string;
+    customerFullName: string;
+    customerEmail: string;
+    customerPhone?: string;
     vehicleMake: string;
     vehicleModel: string;
     startDate: string;
