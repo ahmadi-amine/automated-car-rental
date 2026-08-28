@@ -178,6 +178,30 @@ export class MailService {
             text,
         );
     }
+
+    /** Acknowledge to a client that their booking request was received (still pending). */
+    async sendBookingReceived(data: BookingEmailData): Promise<boolean> {
+        if (!data.customerEmail) {
+            this.logger.warn('Booking acknowledgement skipped — customer has no email.');
+            return false;
+        }
+        const { html, text } = this.renderEmail({
+            agencyName: data.agencyName,
+            headerSubtitle: 'Request received',
+            greetingName: data.customerFirstName,
+            intro: 'Thanks for your booking request! We\'ve received it and the agency will confirm shortly. Here\'s a summary:',
+            rows: this.bookingRows(data),
+            footerNote: 'You\'ll get another email once the agency confirms. No action is needed for now.',
+            accent: '#3b5b7e',
+        });
+        return this.sendEmail(
+            data.customerEmail,
+            `We received your booking request — ${data.agencyName}`,
+            html,
+            data.agencyReplyTo || undefined,
+            text,
+        );
+    }
 }
 
 interface RenderableEmail {
