@@ -11,7 +11,7 @@ A multi-tenant SaaS for car rental agencies, with AI agents that automate bookin
 - Per-agency public pages with a conversational AI booking assistant (text + voice)
 - Fleet management with photo galleries, availability, and AI price suggestions
 - Booking management (confirm / cancel / edit) with a printable quote (devis)
-- Automatic client confirmation email when an agency confirms a booking (Gmail SMTP)
+- Transactional emails (Gmail SMTP): client gets a request-received acknowledgement, then a confirmation or cancellation notice; the agency is emailed each new request
 - Client CRM, expense/maintenance tracking, and per-vehicle profitability
 - Admin approval workflow and role-based access (JWT + RBAC)
 
@@ -26,12 +26,22 @@ cd backend && npm install && npm run start:dev   # http://localhost:3001/api
 cd frontend && npm install && npm run dev         # http://localhost:3000
 ```
 
-## Email notifications (booking confirmations)
+## Email notifications
 
-When an agency confirms a booking (`PATCH /api/bookings/:id/status` → `CONFIRMED`), the
-client is automatically emailed a styled confirmation. Delivery uses **Gmail SMTP** via
-`nodemailer` and is **best-effort** — a mail failure is logged but never breaks the
-confirmation. If the mail env vars are unset, emailing is silently disabled.
+The app sends styled transactional emails (HTML + plain-text) at key booking moments.
+Delivery uses **Gmail SMTP** via `nodemailer` and is **best-effort** — a mail failure is
+logged but never breaks the request. If the mail env vars are unset, emailing is silently
+disabled.
+
+| Trigger | Recipient | Email |
+|---|---|---|
+| Guest submits a booking (`POST /api/bookings/public`) | Client | "Request received" acknowledgement (pending confirmation) |
+| Same event, if the agency has a `publicEmail` | Agency | "New booking request" with customer + booking details (reply-to = client) |
+| Agency confirms (`PATCH /api/bookings/:id/status` → `CONFIRMED`) | Client | "Booking confirmed" |
+| Agency cancels (`PATCH /api/bookings/:id/status` → `CANCELLED`) | Client | "Booking cancelled" |
+
+Client emails set **reply-to** to the agency's `publicEmail` (when set) so replies reach
+the agency; the agency notice sets reply-to to the client.
 
 Configure these in `backend/.env` (see `backend/.env.example`):
 
@@ -44,9 +54,6 @@ Configure these in `backend/.env` (see `backend/.env.example`):
 **Getting the App Password:** [myaccount.google.com/security](https://myaccount.google.com/security)
 → enable **2-Step Verification** → [App passwords](https://myaccount.google.com/apppasswords)
 → create one (name it e.g. "LuxDrive") → paste the 16-character code (spaces don't matter).
-
-**Reply-to:** replies are routed to the confirming agency's `publicEmail` when set, so client
-replies reach the agency rather than the shared sender mailbox.
 
 > **Note:** Gmail may briefly throttle a burst of sends from a newly-created App Password;
 > the first send can take a moment. Normal one-at-a-time confirmations deliver fine. For
