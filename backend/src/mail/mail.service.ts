@@ -154,6 +154,30 @@ export class MailService {
             text,
         );
     }
+
+    /** Notify a client that their booking was cancelled by the agency. */
+    async sendBookingCancellation(data: BookingEmailData): Promise<boolean> {
+        if (!data.customerEmail) {
+            this.logger.warn('Booking cancellation skipped — customer has no email.');
+            return false;
+        }
+        const { html, text } = this.renderEmail({
+            agencyName: data.agencyName,
+            headerSubtitle: 'Booking cancelled',
+            greetingName: data.customerFirstName,
+            intro: 'We\'re sorry to let you know that the following reservation has been cancelled:',
+            rows: this.bookingRows(data),
+            footerNote: 'If this was unexpected or you\'d like to rebook, just reply to this email and we\'ll help.',
+            accent: '#8a6d3b',
+        });
+        return this.sendEmail(
+            data.customerEmail,
+            `Your booking with ${data.agencyName} was cancelled`,
+            html,
+            data.agencyReplyTo || undefined,
+            text,
+        );
+    }
 }
 
 interface RenderableEmail {
