@@ -82,6 +82,22 @@ export class BookingService {
             totalPrice,
         });
 
+        // Notify the agency (if it has a public email) that a request needs review.
+        if (vehicle.agency.publicEmail) {
+            void this.mail.sendNewBookingAgencyNotice({
+                agencyEmail: vehicle.agency.publicEmail,
+                agencyName: vehicle.agency.name,
+                customerFullName: `${customer.firstName} ${customer.lastName}`.trim(),
+                customerEmail: customer.email,
+                customerPhone: customer.phone ?? undefined,
+                vehicleMake: vehicle.make,
+                vehicleModel: vehicle.model,
+                startDate: start.toISOString(),
+                endDate: end.toISOString(),
+                totalPrice,
+            });
+        }
+
         return booking;
     }
 
