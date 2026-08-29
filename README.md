@@ -13,6 +13,7 @@ A multi-tenant SaaS for car rental agencies, with AI agents that automate bookin
 - Booking management (confirm / cancel / edit) with a printable quote (devis)
 - Transactional emails (Gmail SMTP): client gets a request-received acknowledgement, then a confirmation or cancellation notice; the agency is emailed each new request
 - Client CRM, expense/maintenance tracking, and per-vehicle profitability
+- Optional client accounts with email-verified registration (guest booking still works)
 - Admin approval workflow and role-based access (JWT + RBAC)
 
 ## Getting started
@@ -40,6 +41,7 @@ disabled.
 | Same event, if the agency has a `publicEmail` | Agency | "New booking request" with customer + booking details (reply-to = client) |
 | Agency confirms (`PATCH /api/bookings/:id/status` → `CONFIRMED`) | Client | "Booking confirmed" |
 | Agency cancels (`PATCH /api/bookings/:id/status` → `CANCELLED`) | Client | "Booking cancelled" |
+| Client registers (`POST /api/auth/customer/register`) | Client | Email-verification link (account inactive until confirmed) |
 
 Client emails set **reply-to** to the agency's `publicEmail` (when set) so replies reach
 the agency; the agency notice sets reply-to to the client.
