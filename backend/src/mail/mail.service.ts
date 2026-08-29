@@ -73,12 +73,14 @@ export class MailService {
 
     /** The standard vehicle / dates / total rows shared by every booking email. */
     private bookingRows(d: BookingEmailData): Array<[string, string]> {
-        return [
+        const rows: Array<[string, string]> = [
             ['Vehicle', `${d.vehicleMake} ${d.vehicleModel}`],
             ['Pick-up', this.fmtDate(d.startDate)],
             ['Return', this.fmtDate(d.endDate)],
             ['Total', this.fmtPrice(d.totalPrice)],
         ];
+        if (d.reference) rows.unshift(['Reference', d.reference]);
+        return rows;
     }
 
     /**
@@ -215,6 +217,7 @@ export class MailService {
             greetingName: data.agencyName,
             intro: 'A new booking request just came in and is waiting for your confirmation:',
             rows: [
+                ...(data.reference ? [['Reference', data.reference] as [string, string]] : []),
                 ['Customer', data.customerFullName],
                 ['Email', data.customerEmail],
                 ['Phone', data.customerPhone || '—'],
@@ -251,6 +254,8 @@ export interface BookingEmailData {
     customerEmail: string;
     customerFirstName: string;
     agencyName: string;
+    /** Human-friendly booking reference (e.g. LX-3F9A2C). */
+    reference?: string;
     /** Agency's public contact email; used as the reply-to so client replies reach them. */
     agencyReplyTo?: string;
     vehicleMake: string;
@@ -264,6 +269,8 @@ export interface NewBookingAgencyNoticeData {
     /** Agency's public email — the recipient of this notice. */
     agencyEmail: string;
     agencyName: string;
+    /** Human-friendly booking reference (e.g. LX-3F9A2C). */
+    reference?: string;
     customerFullName: string;
     customerEmail: string;
     customerPhone?: string;
