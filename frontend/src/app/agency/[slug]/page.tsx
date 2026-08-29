@@ -621,8 +621,9 @@ export default function PublicAgencyPage() {
                             <div style={{ textAlign: 'center', padding: '40px 0' }}>
                                 <div style={{ fontSize: '56px', color: '#6fa07a', marginBottom: '16px' }}>✓</div>
                                 <h2 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '12px' }}>Request Received!</h2>
-                                <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 24px' }}>
-                                    Your booking request for the <strong>{selectedVehicle?.make} {selectedVehicle?.model}</strong> has been sent to the agency. They will contact you shortly to confirm.
+                                <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '420px', margin: '0 auto 24px' }}>
+                                    Your booking request for the <strong>{selectedVehicle?.make} {selectedVehicle?.model}</strong> has been sent to the agency.
+                                    {bookingForm.email && <> We&apos;ve emailed a confirmation to <strong>{bookingForm.email}</strong> — you&apos;ll hear back once the agency confirms.</>}
                                 </p>
                                 {bookingReference && (
                                     <div style={{ display: 'inline-block', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 18px', marginBottom: '32px' }}>
