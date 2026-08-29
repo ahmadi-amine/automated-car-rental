@@ -15,6 +15,7 @@ export default function PublicAgencyPage() {
     const [activeImg, setActiveImg] = useState<Record<string, string>>({});
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [bookingStep, setBookingStep] = useState(1); // 1: form, 2: success
+    const [bookingReference, setBookingReference] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [bookingForm, setBookingForm] = useState({
@@ -159,6 +160,8 @@ export default function PublicAgencyPage() {
             });
 
             if (res.ok) {
+                const data = await res.json().catch(() => ({}));
+                setBookingReference(data.reference || null);
                 setBookingStep(2);
             } else {
                 const data = await res.json();
@@ -618,10 +621,16 @@ export default function PublicAgencyPage() {
                             <div style={{ textAlign: 'center', padding: '40px 0' }}>
                                 <div style={{ fontSize: '56px', color: '#6fa07a', marginBottom: '16px' }}>✓</div>
                                 <h2 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '12px' }}>Request Received!</h2>
-                                <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 32px' }}>
+                                <p style={{ color: '#a99a83', fontSize: '16px', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto 24px' }}>
                                     Your booking request for the <strong>{selectedVehicle?.make} {selectedVehicle?.model}</strong> has been sent to the agency. They will contact you shortly to confirm.
                                 </p>
-                                <button 
+                                {bookingReference && (
+                                    <div style={{ display: 'inline-block', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 18px', marginBottom: '32px' }}>
+                                        <span style={{ color: '#a99a83', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reference</span>
+                                        <div style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '1px', color: 'white' }}>{bookingReference}</div>
+                                    </div>
+                                )}
+                                <button
                                     onClick={() => setShowBookingModal(false)}
                                     style={{ background: primaryColor, color: 'white', padding: '14px 40px', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}
                                 >
