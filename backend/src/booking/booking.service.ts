@@ -101,7 +101,7 @@ export class BookingService {
             });
         }
 
-        return booking;
+        return { ...booking, reference: bookingRef(booking.id) };
     }
 
     async findAllForAgency(userId: string) {
