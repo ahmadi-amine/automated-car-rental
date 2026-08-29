@@ -256,6 +256,47 @@ export class MailService {
             text,
         );
     }
+
+    /** Send an account email-verification link to a newly-registered client. */
+    async sendVerificationEmail(to: string, firstName: string, verifyUrl: string): Promise<boolean> {
+        const name = this.escapeHtml(firstName || '');
+        const url = this.escapeHtml(verifyUrl);
+        const html = `
+        <div style="background:#f4f1ec;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
+            <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6e0d6;">
+                <div style="background:#7e2637;padding:28px 32px;">
+                    <div style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:0.5px;">LuxDrive</div>
+                    <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">Confirmez votre adresse email</div>
+                </div>
+                <div style="padding:32px;">
+                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Bonjour${name ? ' ' + name : ''},</p>
+                    <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                        Merci de votre inscription. Pour activer votre compte, veuillez confirmer votre adresse email :
+                    </p>
+                    <p style="text-align:center;margin:0 0 24px;">
+                        <a href="${url}" style="display:inline-block;background:#7e2637;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:10px;">Confirmer mon email</a>
+                    </p>
+                    <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:0;">
+                        Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte, ignorez cet email.
+                    </p>
+                </div>
+                <div style="padding:16px 32px;background:#faf8f4;border-top:1px solid #eee;color:#a99a83;font-size:12px;text-align:center;">
+                    LuxDrive
+                </div>
+            </div>
+        </div>`;
+        const text = [
+            'LuxDrive — Confirmez votre adresse email',
+            '',
+            `Bonjour${firstName ? ' ' + firstName : ''},`,
+            '',
+            'Merci de votre inscription. Pour activer votre compte, confirmez votre adresse email en ouvrant ce lien :',
+            verifyUrl,
+            '',
+            'Ce lien expire dans 24 heures. Si vous n\'avez pas créé de compte, ignorez cet email.',
+        ].join('\n');
+        return this.sendEmail(to, 'Confirmez votre adresse email — LuxDrive', html, undefined, text);
+    }
 }
 
 /** The vehicle + rental fields both client and agency emails render into rows. */
