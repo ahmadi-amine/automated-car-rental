@@ -4,6 +4,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { BookingStatus } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
+import { bookingRef } from '../common/booking-ref';
 
 @Injectable()
 export class BookingService {
@@ -73,6 +74,7 @@ export class BookingService {
         void this.mail.sendBookingReceived({
             customerEmail: customer.email,
             customerFirstName: customer.firstName,
+            reference: bookingRef(booking.id),
             agencyName: vehicle.agency.name,
             agencyReplyTo: vehicle.agency.publicEmail ?? undefined,
             vehicleMake: vehicle.make,
@@ -87,6 +89,7 @@ export class BookingService {
             void this.mail.sendNewBookingAgencyNotice({
                 agencyEmail: vehicle.agency.publicEmail,
                 agencyName: vehicle.agency.name,
+                reference: bookingRef(booking.id),
                 customerFullName: `${customer.firstName} ${customer.lastName}`.trim(),
                 customerEmail: customer.email,
                 customerPhone: customer.phone ?? undefined,
@@ -146,6 +149,7 @@ export class BookingService {
         const emailData = {
             customerEmail: booking.customer.email,
             customerFirstName: booking.customer.firstName,
+            reference: bookingRef(booking.id),
             agencyName: booking.agency.name,
             agencyReplyTo: booking.agency.publicEmail ?? undefined,
             vehicleMake: booking.vehicle.make,
