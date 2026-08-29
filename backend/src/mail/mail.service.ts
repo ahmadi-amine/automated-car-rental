@@ -95,14 +95,27 @@ export class MailService {
      * Render a branded email into both an HTML body and a plain-text fallback
      * (better deliverability + accessibility) from the same structured content.
      */
+    /** Escape user-controlled text before interpolating it into an HTML email body. */
+    private escapeHtml(s: string): string {
+        return s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     private renderEmail(c: RenderableEmail): { html: string; text: string } {
         const accent = c.accent || '#7e2637';
+        const esc = (s: string) => this.escapeHtml(s);
+        const agencyName = esc(c.agencyName);
+        const greeting = c.greetingName ? ' ' + esc(c.greetingName) : '';
         const rowHtml = c.rows
             .map(
                 ([label, value]) => `
                 <tr>
-                    <td style="padding:8px 0;color:#8a7f6f;font-size:13px;">${label}</td>
-                    <td style="padding:8px 0;color:#1c1712;font-size:14px;font-weight:600;text-align:right;">${value}</td>
+                    <td style="padding:8px 0;color:#8a7f6f;font-size:13px;">${esc(label)}</td>
+                    <td style="padding:8px 0;color:#1c1712;font-size:14px;font-weight:600;text-align:right;">${esc(value)}</td>
                 </tr>`,
             )
             .join('');
@@ -110,18 +123,18 @@ export class MailService {
         <div style="background:#f4f1ec;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
             <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6e0d6;">
                 <div style="background:${accent};padding:28px 32px;">
-                    <div style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:0.5px;">${c.agencyName}</div>
-                    <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">${c.headerSubtitle}</div>
+                    <div style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:0.5px;">${agencyName}</div>
+                    <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">${esc(c.headerSubtitle)}</div>
                 </div>
                 <div style="padding:32px;">
-                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Bonjour${c.greetingName ? ' ' + c.greetingName : ''},</p>
-                    <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">${c.intro}</p>
+                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Bonjour${greeting},</p>
+                    <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">${esc(c.intro)}</p>
                     <table style="width:100%;border-collapse:collapse;border-top:1px solid #eee;border-bottom:1px solid #eee;">${rowHtml}
                     </table>
-                    <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:24px 0 0;">${c.footerNote}</p>
+                    <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:24px 0 0;">${esc(c.footerNote)}</p>
                 </div>
                 <div style="padding:16px 32px;background:#faf8f4;border-top:1px solid #eee;color:#a99a83;font-size:12px;text-align:center;">
-                    ${c.agencyName} · Envoyé via LuxDrive
+                    ${agencyName} · Envoyé via LuxDrive
                 </div>
             </div>
         </div>`;
