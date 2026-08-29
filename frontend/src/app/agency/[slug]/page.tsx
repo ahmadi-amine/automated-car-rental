@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatbotWidget from '@/components/ChatbotWidget';
 import { getApiUrl } from '@/utils/api';
-import { getCustomerToken, setCustomerToken, clearCustomerToken, customerRegister, customerLogin, fetchCustomerMe } from '@/utils/customerAuth';
+import { getCustomerToken, setCustomerToken, clearCustomerToken, customerRegister, customerLogin, fetchCustomerMe, resendCustomerVerification } from '@/utils/customerAuth';
 
 export default function PublicAgencyPage() {
     const { slug } = useParams();
@@ -70,28 +70,51 @@ export default function PublicAgencyPage() {
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     const [authForm, setAuthForm] = useState({ fullName: '', email: '', password: '' });
     const [authError, setAuthError] = useState('');
+    const [authNotice, setAuthNotice] = useState('');
     const [isAuthLoading, setIsAuthLoading] = useState(false);
+
+    // Whether the current login error is because the email isn't verified yet.
+    const needsVerification = /verify|vérif/i.test(authError);
 
     const openAuth = (mode: 'login' | 'register') => {
         setAuthMode(mode);
         setAuthForm({ fullName: '', email: '', password: '' });
         setAuthError('');
+        setAuthNotice('');
         setShowAuthModal(true);
     };
 
     const submitAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setAuthError('');
+        setAuthNotice('');
         setIsAuthLoading(true);
         try {
-            const res = authMode === 'register'
-                ? await customerRegister(authForm.fullName, authForm.email, authForm.password)
-                : await customerLogin(authForm.email, authForm.password);
-            setCustomerToken(res.access_token);
-            setCustomer(res.customer);
-            setShowAuthModal(false);
+            if (authMode === 'register') {
+                const res = await customerRegister(authForm.fullName, authForm.email, authForm.password);
+                // No session yet — the client must verify their email first.
+                setAuthNotice(res.message || 'Check your email to verify your account before logging in.');
+            } else {
+                const res = await customerLogin(authForm.email, authForm.password);
+                setCustomerToken(res.access_token);
+                setCustomer(res.customer);
+                setShowAuthModal(false);
+            }
         } catch (err: any) {
             setAuthError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsAuthLoading(false);
+        }
+    };
+
+    const resendVerification = async () => {
+        setAuthError('');
+        setIsAuthLoading(true);
+        try {
+            const res = await resendCustomerVerification(authForm.email);
+            setAuthNotice(res.message || 'If an unverified account exists for this email, a new link has been sent.');
+        } catch (err: any) {
+            setAuthError(err.message || 'Could not resend the verification email.');
         } finally {
             setIsAuthLoading(false);
         }
@@ -651,28 +674,47 @@ export default function PublicAgencyPage() {
                             <h2 style={{ fontSize: '22px', margin: 0 }}>{authMode === 'register' ? 'Create account' : 'Sign in'}</h2>
                             <button onClick={() => setShowAuthModal(false)} style={{ background: 'none', border: 'none', color: '#a99a83', cursor: 'pointer' }}><X size={22} /></button>
                         </div>
-                        <p style={{ color: '#a99a83', fontSize: '13px', marginTop: 0, marginBottom: '20px' }}>Optional — sign in to book faster next time. You can always book as a guest.</p>
+                        {authNotice ? (
+                            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                                <div style={{ fontSize: '44px', marginBottom: '12px' }}>📧</div>
+                                <p style={{ color: 'white', fontSize: '15px', lineHeight: '1.6', margin: '0 auto 24px', maxWidth: '320px' }}>{authNotice}</p>
+                                <button onClick={() => setShowAuthModal(false)} style={{ padding: '12px 32px', background: primaryColor, color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}>Got it</button>
+                            </div>
+                        ) : (
+                            <>
+                                <p style={{ color: '#a99a83', fontSize: '13px', marginTop: 0, marginBottom: '20px' }}>Optional — sign in to book faster next time. You can always book as a guest.</p>
 
-                        {authError && <div style={{ background: 'var(--error-soft)', border: '1px solid var(--error)', color: 'var(--error)', padding: '10px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>{authError}</div>}
+                                {authError && (
+                                    <div style={{ background: 'var(--error-soft)', border: '1px solid var(--error)', color: 'var(--error)', padding: '10px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>
+                                        {authError}
+                                        {needsVerification && (
+                                            <div style={{ marginTop: '8px' }}>
+                                                <button type="button" onClick={resendVerification} disabled={isAuthLoading} style={{ ...authLinkStyle, color: 'var(--error)', textDecoration: 'underline' }}>Resend verification email</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
-                        <form onSubmit={submitAuth} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                            {authMode === 'register' && (
-                                <input type="text" required placeholder="Full name" value={authForm.fullName} onChange={(e) => setAuthForm({ ...authForm, fullName: e.target.value })} style={authInputStyle} />
-                            )}
-                            <input type="email" required placeholder="Email" value={authForm.email} onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} style={authInputStyle} />
-                            <input type="password" required placeholder="Password" value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} style={authInputStyle} />
-                            <button type="submit" disabled={isAuthLoading} style={{ marginTop: '4px', padding: '12px', background: primaryColor, color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                {isAuthLoading ? <Loader2 size={18} className="animate-spin" /> : (authMode === 'register' ? 'Create account' : 'Sign in')}
-                            </button>
-                        </form>
+                                <form onSubmit={submitAuth} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                    {authMode === 'register' && (
+                                        <input type="text" required placeholder="Full name" value={authForm.fullName} onChange={(e) => setAuthForm({ ...authForm, fullName: e.target.value })} style={authInputStyle} />
+                                    )}
+                                    <input type="email" required placeholder="Email" value={authForm.email} onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} style={authInputStyle} />
+                                    <input type="password" required placeholder="Password" value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} style={authInputStyle} />
+                                    <button type="submit" disabled={isAuthLoading} style={{ marginTop: '4px', padding: '12px', background: primaryColor, color: 'white', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        {isAuthLoading ? <Loader2 size={18} className="animate-spin" /> : (authMode === 'register' ? 'Create account' : 'Sign in')}
+                                    </button>
+                                </form>
 
-                        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#a99a83' }}>
-                            {authMode === 'register' ? (
-                                <>Already have an account? <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={authLinkStyle}>Sign in</button></>
-                            ) : (
-                                <>New here? <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={authLinkStyle}>Create an account</button></>
-                            )}
-                        </div>
+                                <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#a99a83' }}>
+                                    {authMode === 'register' ? (
+                                        <>Already have an account? <button onClick={() => { setAuthMode('login'); setAuthError(''); }} style={authLinkStyle}>Sign in</button></>
+                                    ) : (
+                                        <>New here? <button onClick={() => { setAuthMode('register'); setAuthError(''); }} style={authLinkStyle}>Create an account</button></>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
