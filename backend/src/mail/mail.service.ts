@@ -141,16 +141,16 @@ export class MailService {
         }
         const { html, text } = this.renderEmail({
             agencyName: data.agencyName,
-            headerSubtitle: 'Booking confirmed',
+            headerSubtitle: 'Réservation confirmée',
             greetingName: data.customerFirstName,
-            intro: 'Great news — your reservation has been confirmed. Here are your booking details:',
+            intro: 'Bonne nouvelle — votre réservation est confirmée. Voici les détails de votre réservation :',
             rows: this.bookingRows(data),
-            footerNote: 'If you have any questions, just reply to this email. We look forward to seeing you!',
+            footerNote: 'Pour toute question, il vous suffit de répondre à cet email. À très bientôt !',
         });
         // Replies go to the agency's own inbox when it has a public email set.
         return this.sendEmail(
             data.customerEmail,
-            `Your booking with ${data.agencyName} is confirmed`,
+            `Votre réservation avec ${data.agencyName} est confirmée`,
             html,
             data.agencyReplyTo || undefined,
             text,
@@ -165,16 +165,16 @@ export class MailService {
         }
         const { html, text } = this.renderEmail({
             agencyName: data.agencyName,
-            headerSubtitle: 'Booking cancelled',
+            headerSubtitle: 'Réservation annulée',
             greetingName: data.customerFirstName,
-            intro: 'We\'re sorry to let you know that the following reservation has been cancelled:',
+            intro: 'Nous sommes désolés de vous informer que la réservation suivante a été annulée :',
             rows: this.bookingRows(data),
-            footerNote: 'If this was unexpected or you\'d like to rebook, just reply to this email and we\'ll help.',
+            footerNote: 'Si cela est inattendu ou si vous souhaitez réserver à nouveau, répondez à cet email et nous vous aiderons.',
             accent: '#8a6d3b',
         });
         return this.sendEmail(
             data.customerEmail,
-            `Your booking with ${data.agencyName} was cancelled`,
+            `Votre réservation avec ${data.agencyName} a été annulée`,
             html,
             data.agencyReplyTo || undefined,
             text,
