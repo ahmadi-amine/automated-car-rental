@@ -64,7 +64,7 @@ export class MailService {
     }
 
     private fmtDate(iso: string): string {
-        return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
     private fmtPrice(n: number): string {
@@ -74,12 +74,12 @@ export class MailService {
     /** The standard vehicle / dates / total rows shared by every booking email. */
     private bookingRows(d: BookingEmailData): Array<[string, string]> {
         const rows: Array<[string, string]> = [
-            ['Vehicle', `${d.vehicleMake} ${d.vehicleModel}`],
-            ['Pick-up', this.fmtDate(d.startDate)],
-            ['Return', this.fmtDate(d.endDate)],
+            ['Véhicule', `${d.vehicleMake} ${d.vehicleModel}`],
+            ['Départ', this.fmtDate(d.startDate)],
+            ['Retour', this.fmtDate(d.endDate)],
             ['Total', this.fmtPrice(d.totalPrice)],
         ];
-        if (d.reference) rows.unshift(['Reference', d.reference]);
+        if (d.reference) rows.unshift(['Référence', d.reference]);
         return rows;
     }
 
@@ -106,21 +106,21 @@ export class MailService {
                     <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">${c.headerSubtitle}</div>
                 </div>
                 <div style="padding:32px;">
-                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Hi ${c.greetingName || 'there'},</p>
+                    <p style="color:#1c1712;font-size:16px;margin:0 0 8px;">Bonjour${c.greetingName ? ' ' + c.greetingName : ''},</p>
                     <p style="color:#4a4238;font-size:14px;line-height:1.6;margin:0 0 24px;">${c.intro}</p>
                     <table style="width:100%;border-collapse:collapse;border-top:1px solid #eee;border-bottom:1px solid #eee;">${rowHtml}
                     </table>
                     <p style="color:#8a7f6f;font-size:13px;line-height:1.6;margin:24px 0 0;">${c.footerNote}</p>
                 </div>
                 <div style="padding:16px 32px;background:#faf8f4;border-top:1px solid #eee;color:#a99a83;font-size:12px;text-align:center;">
-                    ${c.agencyName} · Sent via LuxDrive
+                    ${c.agencyName} · Envoyé via LuxDrive
                 </div>
             </div>
         </div>`;
         const text = [
             `${c.agencyName} — ${c.headerSubtitle}`,
             '',
-            `Hi ${c.greetingName || 'there'},`,
+            `Bonjour${c.greetingName ? ' ' + c.greetingName : ''},`,
             '',
             c.intro,
             '',
@@ -128,7 +128,7 @@ export class MailService {
             '',
             c.footerNote,
             '',
-            `${c.agencyName} · Sent via LuxDrive`,
+            `${c.agencyName} · Envoyé via LuxDrive`,
         ].join('\n');
         return { html, text };
     }
