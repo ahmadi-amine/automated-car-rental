@@ -45,3 +45,21 @@ export async function fetchCustomerMe(token: string) {
     });
     return parse(res);
 }
+
+export async function verifyCustomerEmail(token: string) {
+    const res = await fetch(`${getApiUrl()}/api/auth/customer/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+    });
+    return parse(res);
+}
+
+export async function resendCustomerVerification(email: string) {
+    const res = await fetch(`${getApiUrl()}/api/auth/customer/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+    return parse(res);
+}
