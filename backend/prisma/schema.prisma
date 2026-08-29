@@ -120,6 +120,9 @@ model Customer {
   phone         String?
   licenseNumber String?
   password      String?
+  emailVerified Boolean   @default(false)
+  verificationTokenHash   String?
+  verificationTokenExpiry DateTime?
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
   bookings      Booking[]
