@@ -28,7 +28,8 @@ cd frontend && npm install && npm run dev         # http://localhost:3000
 
 ## Email notifications
 
-The app sends styled transactional emails (HTML + plain-text) at key booking moments.
+The app sends styled transactional emails (HTML + plain-text, in **French**, each with a
+booking reference like `LX-3F9A2C`) at key booking moments.
 Delivery uses **Gmail SMTP** via `nodemailer` and is **best-effort** — a mail failure is
 logged but never breaks the request. If the mail env vars are unset, emailing is silently
 disabled.
