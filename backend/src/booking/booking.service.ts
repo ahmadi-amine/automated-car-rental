@@ -70,11 +70,13 @@ export class BookingService {
             }
         });
 
+        const reference = bookingRef(booking.id);
+
         // Acknowledge the request to the client. Best-effort — never break the booking.
         void this.mail.sendBookingReceived({
             customerEmail: customer.email,
             customerFirstName: customer.firstName,
-            reference: bookingRef(booking.id),
+            reference,
             agencyName: vehicle.agency.name,
             agencyReplyTo: vehicle.agency.publicEmail ?? undefined,
             vehicleMake: vehicle.make,
@@ -89,7 +91,7 @@ export class BookingService {
             void this.mail.sendNewBookingAgencyNotice({
                 agencyEmail: vehicle.agency.publicEmail,
                 agencyName: vehicle.agency.name,
-                reference: bookingRef(booking.id),
+                reference,
                 customerFullName: `${customer.firstName} ${customer.lastName}`.trim(),
                 customerEmail: customer.email,
                 customerPhone: customer.phone ?? undefined,
@@ -101,7 +103,7 @@ export class BookingService {
             });
         }
 
-        return { ...booking, reference: bookingRef(booking.id) };
+        return { ...booking, reference };
     }
 
     async findAllForAgency(userId: string) {
