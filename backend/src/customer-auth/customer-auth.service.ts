@@ -87,7 +87,44 @@ export class CustomerAuthService {
         if (!ok) {
             throw new UnauthorizedException('Invalid email or password.');
         }
+        if (!customer.emailVerified) {
+            throw new UnauthorizedException('Please verify your email before logging in. Check your inbox for the verification link.');
+        }
         return { access_token: await this.signToken(customer), customer: this.publicCustomer(customer) };
+    }
+
+    /** Confirm ownership of an email via the token from the verification link. */
+    async verifyEmail(token: string) {
+        const customer = token
+            ? await this.prisma.customer.findFirst({ where: { verificationTokenHash: this.hashToken(token) } })
+            : null;
+        if (!customer || !customer.verificationTokenExpiry || customer.verificationTokenExpiry < new Date()) {
+            throw new UnauthorizedException('This verification link is invalid or has expired.');
+        }
+        const updated = await this.prisma.customer.update({
+            where: { id: customer.id },
+            data: { emailVerified: true, verificationTokenHash: null, verificationTokenExpiry: null },
+        });
+        // Verified successfully — sign them in.
+        return { access_token: await this.signToken(updated), customer: this.publicCustomer(updated) };
+    }
+
+    /** Re-send a verification link. Always reports success to avoid account enumeration. */
+    async resendVerification(rawEmail: string) {
+        const email = (rawEmail || '').trim().toLowerCase();
+        const customer = email ? await this.prisma.customer.findFirst({ where: { email } }) : null;
+        if (customer?.password && !customer.emailVerified) {
+            const rawToken = this.generateToken();
+            await this.prisma.customer.update({
+                where: { id: customer.id },
+                data: {
+                    verificationTokenHash: this.hashToken(rawToken),
+                    verificationTokenExpiry: new Date(Date.now() + VERIFICATION_TTL_MS),
+                },
+            });
+            await this.sendVerification(customer, rawToken);
+        }
+        return { message: 'If an unverified account exists for this email, a new verification link has been sent.' };
     }
 
     async getMe(customerId: string) {
