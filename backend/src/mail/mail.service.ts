@@ -71,16 +71,24 @@ export class MailService {
         return `${n.toLocaleString('en-US')} MAD`;
     }
 
-    /** The standard vehicle / dates / total rows shared by every booking email. */
-    private bookingRows(d: BookingEmailData): Array<[string, string]> {
-        const rows: Array<[string, string]> = [
+    /** A leading "Référence" row, or nothing when there is no reference. */
+    private refRow(reference?: string): Array<[string, string]> {
+        return reference ? [['Référence', reference]] : [];
+    }
+
+    /** The vehicle / dates / total rows shared by every booking email. */
+    private vehicleRows(d: VehicleLine): Array<[string, string]> {
+        return [
             ['Véhicule', `${d.vehicleMake} ${d.vehicleModel}`],
             ['Départ', this.fmtDate(d.startDate)],
             ['Retour', this.fmtDate(d.endDate)],
             ['Total', this.fmtPrice(d.totalPrice)],
         ];
-        if (d.reference) rows.unshift(['Référence', d.reference]);
-        return rows;
+    }
+
+    /** Reference + vehicle rows for the client-facing booking emails. */
+    private bookingRows(d: BookingEmailData): Array<[string, string]> {
+        return [...this.refRow(d.reference), ...this.vehicleRows(d)];
     }
 
     /**
@@ -217,14 +225,11 @@ export class MailService {
             greetingName: data.agencyName,
             intro: 'Une nouvelle demande de réservation vient d\'arriver et attend votre confirmation :',
             rows: [
-                ...(data.reference ? [['Référence', data.reference] as [string, string]] : []),
+                ...this.refRow(data.reference),
                 ['Client', data.customerFullName],
                 ['Email', data.customerEmail],
                 ['Téléphone', data.customerPhone || '—'],
-                ['Véhicule', `${data.vehicleMake} ${data.vehicleModel}`],
-                ['Départ', this.fmtDate(data.startDate)],
-                ['Retour', this.fmtDate(data.endDate)],
-                ['Total', this.fmtPrice(data.totalPrice)],
+                ...this.vehicleRows(data),
             ],
             footerNote: 'Connectez-vous à votre tableau de bord LuxDrive pour confirmer ou refuser. Répondez pour contacter directement le client.',
             accent: '#3b5b7e',
@@ -238,6 +243,15 @@ export class MailService {
             text,
         );
     }
+}
+
+/** The vehicle + rental fields both client and agency emails render into rows. */
+interface VehicleLine {
+    vehicleMake: string;
+    vehicleModel: string;
+    startDate: string;
+    endDate: string;
+    totalPrice: number;
 }
 
 interface RenderableEmail {
