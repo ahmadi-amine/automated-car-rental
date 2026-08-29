@@ -189,16 +189,16 @@ export class MailService {
         }
         const { html, text } = this.renderEmail({
             agencyName: data.agencyName,
-            headerSubtitle: 'Request received',
+            headerSubtitle: 'Demande reçue',
             greetingName: data.customerFirstName,
-            intro: 'Thanks for your booking request! We\'ve received it and the agency will confirm shortly. Here\'s a summary:',
+            intro: 'Merci pour votre demande de réservation ! Nous l\'avons bien reçue et l\'agence la confirmera prochainement. Voici un récapitulatif :',
             rows: this.bookingRows(data),
-            footerNote: 'You\'ll get another email once the agency confirms. No action is needed for now.',
+            footerNote: 'Vous recevrez un autre email dès que l\'agence aura confirmé. Aucune action n\'est requise pour le moment.',
             accent: '#3b5b7e',
         });
         return this.sendEmail(
             data.customerEmail,
-            `We received your booking request — ${data.agencyName}`,
+            `Nous avons bien reçu votre demande de réservation — ${data.agencyName}`,
             html,
             data.agencyReplyTo || undefined,
             text,
@@ -213,26 +213,26 @@ export class MailService {
         }
         const { html, text } = this.renderEmail({
             agencyName: data.agencyName,
-            headerSubtitle: 'New booking request',
+            headerSubtitle: 'Nouvelle demande de réservation',
             greetingName: data.agencyName,
-            intro: 'A new booking request just came in and is waiting for your confirmation:',
+            intro: 'Une nouvelle demande de réservation vient d\'arriver et attend votre confirmation :',
             rows: [
-                ...(data.reference ? [['Reference', data.reference] as [string, string]] : []),
-                ['Customer', data.customerFullName],
+                ...(data.reference ? [['Référence', data.reference] as [string, string]] : []),
+                ['Client', data.customerFullName],
                 ['Email', data.customerEmail],
-                ['Phone', data.customerPhone || '—'],
-                ['Vehicle', `${data.vehicleMake} ${data.vehicleModel}`],
-                ['Pick-up', this.fmtDate(data.startDate)],
-                ['Return', this.fmtDate(data.endDate)],
+                ['Téléphone', data.customerPhone || '—'],
+                ['Véhicule', `${data.vehicleMake} ${data.vehicleModel}`],
+                ['Départ', this.fmtDate(data.startDate)],
+                ['Retour', this.fmtDate(data.endDate)],
                 ['Total', this.fmtPrice(data.totalPrice)],
             ],
-            footerNote: 'Log in to your LuxDrive dashboard to confirm or decline. Reply to reach the client directly.',
+            footerNote: 'Connectez-vous à votre tableau de bord LuxDrive pour confirmer ou refuser. Répondez pour contacter directement le client.',
             accent: '#3b5b7e',
         });
         // Reply-to the client so the agency can respond to them directly.
         return this.sendEmail(
             data.agencyEmail,
-            `New booking request from ${data.customerFullName}`,
+            `Nouvelle demande de réservation de ${data.customerFullName}`,
             html,
             data.customerEmail || undefined,
             text,
