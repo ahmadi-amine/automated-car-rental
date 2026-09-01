@@ -38,6 +38,16 @@ export class CustomerAuthService {
         return crypto.createHash('sha256').update(raw).digest('hex');
     }
 
+    /** Fresh single-use verification token plus the DB fields that persist its hash. */
+    private newVerification() {
+        const rawToken = this.generateToken();
+        return {
+            rawToken,
+            verificationTokenHash: this.hashToken(rawToken),
+            verificationTokenExpiry: new Date(Date.now() + VERIFICATION_TTL_MS),
+        };
+    }
+
     /** Build the verification link and email it to the customer (best-effort). */
     private async sendVerification(customer: { email: string; firstName: string }, rawToken: string) {
         const base = (this.config.get<string>('APP_URL') || 'http://localhost:3000').replace(/\/$/, '');
@@ -59,14 +69,13 @@ export class CustomerAuthService {
         const firstName = parts.shift() || 'Client';
         const lastName = parts.join(' ');
 
-        const rawToken = this.generateToken();
+        const { rawToken, ...verification } = this.newVerification();
         const data = {
             firstName,
             lastName,
             password: hash,
             emailVerified: false,
-            verificationTokenHash: this.hashToken(rawToken),
-            verificationTokenExpiry: new Date(Date.now() + VERIFICATION_TTL_MS),
+            ...verification,
         };
 
         // Upgrade an existing guest (preserving their booking history) or create a new account.
@@ -119,14 +128,8 @@ export class CustomerAuthService {
         const email = (rawEmail || '').trim().toLowerCase();
         const customer = email ? await this.prisma.customer.findFirst({ where: { email } }) : null;
         if (customer?.password && !customer.emailVerified) {
-            const rawToken = this.generateToken();
-            await this.prisma.customer.update({
-                where: { id: customer.id },
-                data: {
-                    verificationTokenHash: this.hashToken(rawToken),
-                    verificationTokenExpiry: new Date(Date.now() + VERIFICATION_TTL_MS),
-                },
-            });
+            const { rawToken, ...verification } = this.newVerification();
+            await this.prisma.customer.update({ where: { id: customer.id }, data: verification });
             await this.sendVerification(customer, rawToken);
         }
         return { message: 'If an unverified account exists for this email, a new verification link has been sent.' };
