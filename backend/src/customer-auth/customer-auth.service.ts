@@ -9,6 +9,9 @@ import { CustomerRegisterDto } from './dto/customer-register.dto';
 import { CustomerLoginDto } from './dto/customer-login.dto';
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+// A valid bcrypt hash used only to equalize login timing when no real password
+// exists, so missing/guest accounts can't be distinguished by response time.
+const DUMMY_PASSWORD_HASH = '$2b$10$rI7Leox2zuFwiAlfLNM6neQQMtj1lyaVXCQlU239sc5OYtJcI0BBa';
 
 @Injectable()
 export class CustomerAuthService {
@@ -81,6 +84,8 @@ export class CustomerAuthService {
         const email = dto.email.trim().toLowerCase();
         const customer = await this.prisma.customer.findFirst({ where: { email } });
         if (!customer || !customer.password) {
+            // Run a throwaway compare so this path takes the same time as a real one.
+            await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
             throw new UnauthorizedException('Invalid email or password.');
         }
         const ok = await bcrypt.compare(dto.password, customer.password);
