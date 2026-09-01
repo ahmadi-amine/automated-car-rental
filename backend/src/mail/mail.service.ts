@@ -68,7 +68,7 @@ export class MailService {
     }
 
     private fmtPrice(n: number): string {
-        return `${n.toLocaleString('en-US')} MAD`;
+        return `${n.toLocaleString('fr-FR')} MAD`;
     }
 
     /** A leading "Référence" row, or nothing when there is no reference. */
