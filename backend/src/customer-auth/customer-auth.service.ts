@@ -84,8 +84,9 @@ export class CustomerAuthService {
             : await this.prisma.customer.create({ data: { ...data, email } });
 
         // No session is issued until the email is verified — this is what prevents
-        // an attacker from claiming someone else's email.
-        await this.sendVerification(customer, rawToken);
+        // an attacker from claiming someone else's email. Send is fire-and-forget so
+        // registration stays responsive even if the mail server is slow.
+        void this.sendVerification(customer, rawToken);
         return { message: 'Account created. Check your email to verify your address before logging in.' };
     }
 
@@ -130,7 +131,7 @@ export class CustomerAuthService {
         if (customer?.password && !customer.emailVerified) {
             const { rawToken, ...verification } = this.newVerification();
             await this.prisma.customer.update({ where: { id: customer.id }, data: verification });
-            await this.sendVerification(customer, rawToken);
+            void this.sendVerification(customer, rawToken);
         }
         return { message: 'If an unverified account exists for this email, a new verification link has been sent.' };
     }
