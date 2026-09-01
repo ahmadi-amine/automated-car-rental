@@ -127,6 +127,9 @@ model Customer {
   updatedAt     DateTime             @updatedAt
   bookings      Booking[]
   agencyNotes   AgencyCustomerNote[]
+
+  @@index([email])
+  @@index([verificationTokenHash])
 }
 
 // Internal note an agency keeps about a customer (agency-scoped, not shared across agencies).
