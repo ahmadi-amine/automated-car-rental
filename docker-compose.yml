@@ -28,6 +28,13 @@ services:
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
       - PORT=3001
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Public web app URL (email verification links) and allowed CORS origin
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      # Email (Gmail SMTP) — see backend/.env.example
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
