@@ -28,13 +28,20 @@ Copy the templates and fill in real values. **Never commit real secrets** —
 | `NEXT_PUBLIC_API_URL` | **Public** backend origin the browser calls (baked into the web build) |
 
 ### Backend (`backend/.env`, manual/local runs) — see `backend/.env.example`
-`DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `PORT`, `OPENAI_API_KEY`, `CORS_ORIGIN`.
+`DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `PORT`, `OPENAI_API_KEY`, `CORS_ORIGIN`, `APP_URL`.
 
-**Email (booking confirmations, optional):** `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `MAIL_FROM`.
-Sends the client a confirmation when an agency confirms a booking, via Gmail SMTP.
-`GMAIL_APP_PASSWORD` is a 16-char Google App Password (needs 2-Step Verification), not the
-account password. Leave `GMAIL_APP_PASSWORD` empty to disable emailing. See the README's
-"Email notifications" section for details.
+`APP_URL` is the **public web app URL** used to build email links (e.g. the account
+verification link) — set it to the real frontend URL in production, or verification links
+will point at `localhost`.
+
+**Email (booking + verification emails, optional):** `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `MAIL_FROM`.
+Sends booking-status and account-verification emails via Gmail SMTP. `GMAIL_APP_PASSWORD`
+is a 16-char Google App Password (needs 2-Step Verification), not the account password.
+Leave `GMAIL_APP_PASSWORD` empty to disable emailing. See the README's "Email notifications"
+section for details.
+
+> When deploying with `docker-compose.yml`, set all of the above in the **root `.env`**
+> (see root `.env.example`) — Compose passes them through to the backend service.
 
 > **Important — `NEXT_PUBLIC_API_URL` is baked at build time.** Next.js inlines
 > `NEXT_PUBLIC_*` during `next build`, so it is passed as a Docker **build arg**, not a
@@ -88,6 +95,8 @@ npm start                     # serves on 3000
 
 ## 6. Post-deploy checklist
 
+- [ ] `GET /api/health` returns `{"status":"ok","database":"up",...}` (liveness + DB probe;
+      returns 503 if the DB is unreachable — use it for load-balancer / uptime health checks).
 - [ ] `GET /api` returns 200; `GET /api/agency/public/<known-slug>` returns agency JSON.
 - [ ] Web loads and the chatbot answers (validates OpenAI + DB connectivity).
 - [ ] `NEXT_PUBLIC_API_URL` points at the public API origin (check browser network calls).
