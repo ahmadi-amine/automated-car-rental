@@ -14,6 +14,7 @@ import { CustomerModule } from './customer/customer.module';
 import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { ExpenseModule } from './expense/expense.module';
 import { MailModule } from './mail/mail.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { MailModule } from './mail/mail.module';
     ExpenseModule,
     MailModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule { }
