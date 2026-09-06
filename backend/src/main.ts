@@ -21,6 +21,9 @@ async function bootstrap() {
     : true;
   app.enableCors({ origin: corsOrigin, credentials: true });
 
+  // Clean shutdown on SIGTERM/SIGINT (e.g. `docker stop`) so Prisma disconnects.
+  app.enableShutdownHooks();
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
